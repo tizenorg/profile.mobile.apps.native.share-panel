@@ -75,11 +75,9 @@ rm -rf %{buildroot}
 
 %files
 %manifest %{name}.manifest
-%defattr(-,root,root,-)
 %{AppInstallPath}/bin/share-panel
 %{AppInstallPath}/res/*
 %{_datarootdir}/packages/%{name}.xml
-/etc/smack/accesses.d/%{name}.efl
 %{AppInstallPath}/res/locale/*/LC_MESSAGES/*
 
 
