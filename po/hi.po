@@ -1,0 +1,6 @@
+msgid "IDS_AM_HEADER_SHARE"
+msgstr "साझा करें"
+
+msgid "IDS_BT_POP_NO_APPLICATIONS_AVAILABLE_TO_OPEN_FILES"
+msgstr "फाइलें खोलने के लिए एप्लीकेशंस उपलब्ध नहीं।"
+

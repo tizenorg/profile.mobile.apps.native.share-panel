@@ -1,0 +1,6 @@
+msgid "IDS_AM_HEADER_SHARE"
+msgstr "Comhroinn"
+
+msgid "IDS_BT_POP_NO_APPLICATIONS_AVAILABLE_TO_OPEN_FILES"
+msgstr "Níl feidhmchláir ar fáil le comhaid a oscailt."
+

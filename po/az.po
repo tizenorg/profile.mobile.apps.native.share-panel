@@ -1,0 +1,6 @@
+msgid "IDS_AM_HEADER_SHARE"
+msgstr "Paylaş"
+
+msgid "IDS_BT_POP_NO_APPLICATIONS_AVAILABLE_TO_OPEN_FILES"
+msgstr "Faylları açmaq üçün proqram yoxdur."
+

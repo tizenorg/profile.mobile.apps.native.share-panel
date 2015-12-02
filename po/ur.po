@@ -1,0 +1,6 @@
+msgid "IDS_AM_HEADER_SHARE"
+msgstr "شراکت"
+
+msgid "IDS_BT_POP_NO_APPLICATIONS_AVAILABLE_TO_OPEN_FILES"
+msgstr "فائلز اوپن کرنے کے لیے کوئی ایپلیکشن دستیاب نہیں۔"
+

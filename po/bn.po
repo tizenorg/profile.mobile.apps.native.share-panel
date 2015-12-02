@@ -1,0 +1,6 @@
+msgid "IDS_AM_HEADER_SHARE"
+msgstr "শেয়ার করুন"
+
+msgid "IDS_BT_POP_NO_APPLICATIONS_AVAILABLE_TO_OPEN_FILES"
+msgstr "ফাইলগুলি খোলার জন্য কোনও অ্যাপ্লিকেশন সুলভ নেই।"
+

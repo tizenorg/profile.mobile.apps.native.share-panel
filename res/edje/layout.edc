@@ -1,0 +1,201 @@
+/*
+ * Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
+ *
+ * Licensed under the Apache License, Version 2.0 (the License);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "conf.edc"
+
+styles {
+	style {
+		name: "text_style";
+		base: "font=Tizen:style=Regular font_size=50 color=#3DBACD align=center wrap=mixed ellipsis=-1";
+		tag:  "br" "\n";
+		tag:  "hilight" "+ font_weight=Bold";
+		tag:  "b" "+ font_weight=Bold";
+		tag:  "tab" "\t";
+	}
+}
+
+collections {
+	base_scale: 2.6;
+	group {
+		name: "layout";
+		parts {
+			part {
+				name: "bg";
+				type: RECT;
+				mouse_events: 1;
+				description {
+					state: "default" 0.0;
+					rel1 { relative: 0.0 0.0; }
+					rel2 { relative: 1.0 1.0; }
+					visible: 1;
+					color: 8 8 8 80;
+				}
+			}
+			part {
+				name: "event";
+				type: SWALLOW;
+				mouse_events: 1;
+				description {
+					state: "default" 0.0;
+					rel1 { relative: 0.0 0.0; to: "bg"; }
+					rel2 { relative: 1.0 1.0; to: "bg"; }
+					visible: 1;
+				}
+			}
+			part {
+				name: "fixed_bg";
+				type: SWALLOW;
+				repeat_events: 1;
+				description {
+					state: "default" 0.0;
+					rel1 { relative: 0.5 1.0; }
+					rel2 { relative: 0.5 1.0; }
+					align: 0.5 1.0;
+					fixed: 1 1;
+					visible: 1;
+				}
+				description {
+					state: "1line" 0.0;
+					inherit: "default" 0.0;
+					rel1 { relative: 0.5 1.15; }
+					rel2 { relative: 0.5 1.15; }
+				}
+				description {
+					state: "1line,land" 0.0;
+					inherit: "default" 0.0;
+					rel1 { relative: 0.5 1.25; }
+					rel2 { relative: 0.5 1.25; }
+				}
+			}
+			part {
+				name: "title,bg";
+				type: RECT;
+				description {
+					state: "default" 0.0;
+					rel1 { relative: 0.0 (BASE_HEIGHT-PANEL_HEIGHT)/BASE_HEIGHT; to: "fixed_bg"; }
+					rel2 { relative: 1.0 (BASE_HEIGHT-(SCROLLER_HEIGHT+INDEX_HEIGHT))/BASE_HEIGHT; to: "fixed_bg"; }
+					visible: 1;
+					color: 250 250 250 255;
+				}
+			}
+			part {
+				name: "title";
+				type: TEXTBLOCK;
+				scale: 1;
+				description {
+					rel1.to: "title,bg";
+					rel2.to: "title,bg";
+					visible: 1;
+					text {
+						style: "text_style";
+						text: "share panel";
+						align: 0.5 0.5;
+					}
+				}
+			}
+			part {
+				name: "scroller,bg";
+				type: RECT;
+				description {
+					state: "default" 0.0;
+					rel1 { relative: 0.0 (BASE_HEIGHT-(SCROLLER_HEIGHT+INDEX_HEIGHT))/BASE_HEIGHT; to: "fixed_bg"; }
+					rel2 { relative: 1.0 (BASE_HEIGHT-INDEX_HEIGHT)/BASE_HEIGHT; to: "fixed_bg"; }
+					visible: 1;
+					color: 250 250 250 255;
+				}
+			}
+			part {
+				name: "scroller";
+				type: SWALLOW;
+				scale: 1;
+				description {
+					rel1.to: "scroller,bg";
+					rel2.to: "scroller,bg";
+					visible: 1;
+					fixed: 1 1;
+				}
+			}
+			part {
+				name: "index,bg";
+				type: RECT;
+				description {
+					state: "default" 0.0;
+					rel1 { relative: 0.0 (BASE_HEIGHT-INDEX_HEIGHT)/BASE_HEIGHT; to: "fixed_bg"; }
+					rel2 { relative: 1.0 1.0; to: "fixed_bg"; }
+					visible: 1;
+					color: 250 250 250 255;
+				}
+			}
+			part {
+				name: "index";
+				type: SWALLOW;
+				scale: 1;
+				description {
+					rel1.to: "index,bg";
+					rel2.to: "index,bg";
+					visible: 1;
+					fixed: 1 1;
+				}
+			}
+			part {
+				name: "blocker";
+				type: RECT;
+				description {
+					state: "default" 0.0;
+					rel1.to: "bg";
+					rel2.to: "bg";
+					visible: 0;
+					color: 255 255 255 0;
+				}
+				description {
+					state: "show" 0.0;
+					inherit: "default" 0.0;
+					visible: 1;
+				}
+			}
+		}
+		programs {
+			program {
+				name: "1line";
+				signal: "1line";
+				source: "fixed_bg";
+				action: STATE_SET "1line" 0.0;
+				target: "fixed_bg";
+			}
+			program {
+				name: "1line,land";
+				signal: "1line,land";
+				source: "fixed_bg";
+				action: STATE_SET "1line,land" 0.0;
+				target: "fixed_bg";
+			}
+			program {
+				name: "block,hide";
+				signal: "hide";
+				source: "blocker";
+				action: STATE_SET "default" 0.0;
+				target: "blocker";
+			}
+			program {
+				name: "block,show";
+				signal: "show";
+				source: "blocker";
+				action: STATE_SET "show" 0.0;
+				target: "blocker";
+			}
+		}
+	} //group
+} //collections

@@ -1,0 +1,8 @@
+<manifest>
+	<request>
+		<domain name="org.tizen.share-panel"/>
+	</request>
+	<assign>
+		<filesystem path="/usr/apps/org.tizen.share-panel/bin/share-panel" label="org.tizen.share-panel" exec_label="org.tizen.share-panel" />
+	</assign>
+</manifest>

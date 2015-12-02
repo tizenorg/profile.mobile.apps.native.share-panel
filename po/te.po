@@ -1,0 +1,6 @@
+msgid "IDS_AM_HEADER_SHARE"
+msgstr "భాగస్వామ్యం చేయి"
+
+msgid "IDS_BT_POP_NO_APPLICATIONS_AVAILABLE_TO_OPEN_FILES"
+msgstr "ఫైళ్లను తరవడానికి అప్లికేషన్లు లభ్యంలో లేవు."
+
