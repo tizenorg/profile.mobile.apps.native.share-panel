@@ -20,7 +20,7 @@
 #include <bundle.h>
 #include <bundle_internal.h>
 #include <Elementary.h>
-#include <launch/app_sock.h>
+#include <aul_svc.h>
 #include <notification.h>
 
 #include "share_panel_internal.h"
@@ -377,9 +377,9 @@ void _ui_manager_reply_to_cancellation(share_panel_h share_panel)
 		goto OUT;
 	}
 
-	ret = app_send_cmd_with_noreply(-2, APP_CANCEL, kb);
+	ret = aul_svc_send_result(kb, AUL_SVC_RES_CANCEL);
 	if (ret != AUL_R_OK) {
-		_E("app_send_cmd error(%d)", ret);
+		_E("aul svc send result error(%d)", ret);
 	}
 
 OUT:
