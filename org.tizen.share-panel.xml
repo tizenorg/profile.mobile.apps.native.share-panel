@@ -8,4 +8,8 @@
 		<label>Share panel</label>
 		<label xml:lang="en-us">Share panel</label>
 	</ui-application>
+	<privileges>
+		<privilege>http://tizen.org/privilege/appmanager.launch</privilege>
+	</privileges>
+
 </manifest>
