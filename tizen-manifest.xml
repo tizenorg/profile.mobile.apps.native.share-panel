@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<manifest xmlns="http://tizen.org/ns/packages" api-version="3.0" install-location="internal-only" package="org.tizen.share-panel" version="1.0.0">
+    <profile name="mobile"/>
+    <ui-application appid="org.tizen.share-panel" exec="share-panel" hw-acceleration="on" launch_mode="group" multiple="true" nodisplay="false" type="capp">
+        <label>share-panel</label>
+        <icon>share-panel.png</icon>
+        <app-control>
+            <mime name="*/*"/>
+            <operation name="http://tizen.org/appcontrol/operation/share"/>
+        </app-control>
+        <app-control>
+            <operation name="http://tizen.org/appcontrol/operation/multi_share"/>
+            <mime name="*/*"/>
+        </app-control>
+    </ui-application>
+    <privileges>
+        <privilege>http://tizen.org/privilege/packagemanager.info</privilege>
+        <privilege>http://tizen.org/privilege/appmanager.launch</privilege>
+    </privileges>
+</manifest>

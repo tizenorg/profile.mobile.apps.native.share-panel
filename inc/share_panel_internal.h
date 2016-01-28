@@ -58,7 +58,6 @@ struct _share_panel {
 	int page_height;
 	int show_state;
 	int list_count;
-	int after_launch;
 };
 typedef struct _share_panel share_panel_s;
 
@@ -66,7 +65,6 @@ typedef struct _share_panel share_panel_s;
 
 struct _item {
 	bundle *b;
-	share_panel_s *share_panel;
 
 	char *appid;
 	char *name;

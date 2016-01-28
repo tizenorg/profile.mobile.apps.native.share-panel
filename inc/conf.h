@@ -38,6 +38,9 @@
 /* PANEL_HEIGHT is changed from 368 to 320 about 87% decrease because of resolution issues. */
 #define PANEL_HEIGHT (SCROLLER_HEIGHT+INDEX_HEIGHT+TITLE_HEIGHT)
 
-
+#define PROJECT "share-panel"
+#define PACKAGE "org.tizen.share-panel"
+#define LOCALEDIR  "res/locale"
+#define EDJEDIR "res/edje"
 
 #endif /* __TIZEN_SHARE_PANEL_CONF_H__ */
