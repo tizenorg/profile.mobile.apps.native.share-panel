@@ -58,7 +58,6 @@ collections {
 			part {
 				name: "fixed_bg";
 				type: SWALLOW;
-				repeat_events: 1;
 				description {
 					state: "default" 0.0;
 					rel1 { relative: 0.5 1.0; }
@@ -150,22 +149,6 @@ collections {
 					fixed: 1 1;
 				}
 			}
-			part {
-				name: "blocker";
-				type: RECT;
-				description {
-					state: "default" 0.0;
-					rel1.to: "bg";
-					rel2.to: "bg";
-					visible: 0;
-					color: 255 255 255 0;
-				}
-				description {
-					state: "show" 0.0;
-					inherit: "default" 0.0;
-					visible: 1;
-				}
-			}
 		}
 		programs {
 			program {
@@ -181,20 +164,6 @@ collections {
 				source: "fixed_bg";
 				action: STATE_SET "1line,land" 0.0;
 				target: "fixed_bg";
-			}
-			program {
-				name: "block,hide";
-				signal: "hide";
-				source: "blocker";
-				action: STATE_SET "default" 0.0;
-				target: "blocker";
-			}
-			program {
-				name: "block,show";
-				signal: "show";
-				source: "blocker";
-				action: STATE_SET "show" 0.0;
-				target: "blocker";
 			}
 		}
 	} //group

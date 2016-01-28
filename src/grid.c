@@ -17,7 +17,8 @@
 #include <Elementary.h>
 #include <app.h>
 #include <app_manager.h>
-#include <aul.h>
+#include <app_control.h>
+#include <bundle.h>
 
 #include "share_panel_internal.h"
 #include "conf.h"
@@ -26,22 +27,26 @@
 
 #define PRIVATE_DATA_KEY_ITEM_INFO "pdkii"
 
+struct _launch_data {
+	app_control_h app_control;
+    app_control_h caller_control;
+    char *uri;
+    char *operation;
+    char **data_array;
+    int data_array_size;
+};
 
+typedef struct _launch_data launch_data_t;
 
-static const char *const FILE_LAYOUT_EDJ = EDJEDIR"/layout.edj";
 static struct {
 	Elm_Gengrid_Item_Class *gic;
 	char *default_icon;
-
 	int index;
 } grid_info = {
 	.gic = NULL,
 	.default_icon = "/usr/share/icons/A01-1_icon_Menu.png",
-
 	.index = 0,
 };
-
-
 
 static char *__text_get(void *data, Evas_Object *obj, const char *part)
 {
@@ -49,14 +54,11 @@ static char *__text_get(void *data, Evas_Object *obj, const char *part)
 	retv_if(!info, NULL);
 
 	retv_if(!info->name, NULL);
-	if (!strcmp(part, "elm.text")) {
+	if (!strcmp(part, "elm.text"))
 		return strdup(D_(info->name));
-	}
 
 	return NULL;
 }
-
-
 
 #define FILE_ITEM_EDJ EDJEDIR"/item.edj"
 static Evas_Object *__add_icon(Evas_Object *parent, const char *file)
@@ -100,8 +102,6 @@ static Evas_Object *__add_icon(Evas_Object *parent, const char *file)
 	return icon_layout;
 }
 
-
-
 static Evas_Object *__content_get(void *data, Evas_Object *obj, const char *part)
 {
 	item_s *info = data;
@@ -125,15 +125,125 @@ static Evas_Object *__content_get(void *data, Evas_Object *obj, const char *part
 	return NULL;
 }
 
-
-
 static void __del(void *data, Evas_Object *obj)
 {
 	ret_if(NULL == data);
 	evas_object_data_del(obj, PRIVATE_DATA_KEY_ITEM_INFO);
 }
 
+static void _app_control_launch_release(launch_data_t launch_data)
+{
+	int i;
 
+	if(launch_data.app_control)
+		app_control_destroy(launch_data.app_control);
+
+	if(launch_data.caller_control)
+		app_control_destroy(launch_data.caller_control);
+
+	free(launch_data.operation);
+	free(launch_data.uri);
+
+	if (!launch_data.data_array)
+		return;
+
+	for (i = 0; i < launch_data.data_array_size; i++)
+		free(launch_data.data_array[i]);
+}
+
+static bool _app_control_error_handle(launch_data_t launch_data, int ret_value, const char *func_name)
+{
+	if (ret_value != APP_CONTROL_ERROR_NONE) {
+		_app_control_launch_release(launch_data);
+		_E("(ret != APP_CONTROL_ERROR_NONE) -> %s() return", func_name);
+		return true;
+	}
+
+	return false;
+}
+
+static void __bundle_data_foreach_cb(const char *key, const int type, const bundle_keyval_t *kv, void *user_data)
+{
+	app_control_h app_control = (app_control_h)user_data;
+	int ret;
+	void *val = NULL;
+	size_t size = 0;
+	void **array_val = NULL;
+	unsigned int array_len = 0;
+	size_t *array_elem_size = NULL;
+
+	if (bundle_keyval_type_is_array((bundle_keyval_t *)kv)) {
+		ret = bundle_keyval_get_array_val((bundle_keyval_t *)kv, &array_val, &array_len, &array_elem_size);
+		ret_if(ret != BUNDLE_ERROR_NONE);
+
+		ret = app_control_add_extra_data_array(app_control, key, (const char **)array_val, array_len);
+		ret_if(ret != APP_CONTROL_ERROR_NONE);
+	} else {
+		ret = bundle_keyval_get_basic_val((bundle_keyval_t *)kv, &val, &size);
+		ret_if(ret != BUNDLE_ERROR_NONE);
+
+		app_control_add_extra_data(app_control, key, (const char *)val);
+		ret_if(ret != APP_CONTROL_ERROR_NONE);
+	}
+}
+
+int _app_control_launch(item_s *item)
+{
+	int ret = APP_CONTROL_ERROR_NONE;
+	launch_data_t launch_data = {0,};
+
+	ret = app_control_create(&launch_data.app_control);
+	retv_if(ret != APP_CONTROL_ERROR_NONE, ret);
+
+	ret = app_control_create(&launch_data.caller_control);
+	if (_app_control_error_handle(launch_data, ret, "app_control_create"))
+		return ret;
+
+	bundle_foreach(item->b, __bundle_data_foreach_cb, (void *)launch_data.caller_control);
+
+	ret = app_control_get_operation(launch_data.caller_control, &launch_data.operation);
+	if (_app_control_error_handle(launch_data, ret, "app_control_get_operation"))
+		return ret;
+
+	ret = app_control_get_uri(launch_data.caller_control, &launch_data.uri);
+	if (_app_control_error_handle(launch_data, ret, "app_control_get_uri"))
+		return ret;
+
+	ret = app_control_get_extra_data_array(launch_data.caller_control, TIZEN_DATA_PATH, &launch_data.data_array, &launch_data.data_array_size);
+	if (_app_control_error_handle(launch_data, ret, "app_control_get_extra_data_array"))
+		return ret;
+
+	_D("Operation: %s", launch_data.operation);
+
+	ret = app_control_set_operation(launch_data.app_control, launch_data.operation);
+	if (_app_control_error_handle(launch_data, ret, "app_control_set_operation"))
+		return ret;
+
+	ret = app_control_set_uri(launch_data.app_control, launch_data.uri);
+	if (_app_control_error_handle(launch_data, ret, "app_control_set_uri"))
+		return ret;
+
+	ret = app_control_add_extra_data_array(launch_data.app_control, TIZEN_DATA_PATH, (const char **)launch_data.data_array, launch_data.data_array_size);
+	if (_app_control_error_handle(launch_data, ret, "app_control_add_extra_data_array"))
+		return ret;
+
+	ret = app_control_set_app_id(launch_data.app_control, item->appid);
+	if (_app_control_error_handle(launch_data, ret, "app_control_set_app_id"))
+		return ret;
+
+	ret = app_control_set_launch_mode(launch_data.app_control, APP_CONTROL_LAUNCH_MODE_GROUP);
+	if (_app_control_error_handle(launch_data, ret, "app_control_set_launch_mode"))
+		return ret;
+
+	ret = app_control_send_launch_request(launch_data.app_control, NULL, NULL);
+	if (_app_control_error_handle(launch_data, ret, "app_control_send_launch_request"))
+		return ret;
+
+	_D("app launched");
+
+	_app_control_launch_release(launch_data);
+	return ret;
+}
 
 static void __item_selected(void *data, Evas_Object *obj, void *event_info)
 {
@@ -145,24 +255,18 @@ static void __item_selected(void *data, Evas_Object *obj, void *event_info)
 	ret_if(!item_info);
 	ret_if(!item_info->appid);
 	ret_if(!item_info->b);
-	ret_if(!item_info->share_panel);
 	_D("item clicked, launch app : %s", item_info->appid);
 
 	selected_item = elm_gengrid_selected_item_get(obj);
 	ret_if(!selected_item);
 	elm_gengrid_item_selected_set(selected_item, EINA_FALSE);
 
-
-	ret = aul_forward_app(item_info->appid, item_info->b);
-	if (ret < 0) {
+	ret = _app_control_launch(item_info);
+	if (ret < 0)
 		_E("Fail to launch app(%d)", ret);
-	}
 
-	item_info->share_panel->after_launch = 1;
-	elm_object_signal_emit(item_info->share_panel->ui_manager, "show", "blocker");
+	ui_app_exit();
 }
-
-
 
 static void __lang_changed_cb(void *data, Evas_Object *grid, void *event_info)
 {
@@ -177,10 +281,16 @@ static void __lang_changed_cb(void *data, Evas_Object *grid, void *event_info)
 		char *name = NULL;
 
 		item_info = evas_object_data_get(it, PRIVATE_DATA_KEY_ITEM_INFO);
-		goto_if(!item_info, next);
+		if (!item_info) {
+			it = elm_gengrid_item_next_get(it);
+			continue;
+		}
 
 		ret = app_info_create(item_info->appid, &app_info);
-		goto_if(ret != APP_MANAGER_ERROR_NONE && !app_info, next);
+		if (ret != APP_MANAGER_ERROR_NONE && !app_info) {
+			it = elm_gengrid_item_next_get(it);
+			continue;
+		}
 
 		ret = app_info_get_label(app_info, &name);
 		if (ret == APP_MANAGER_ERROR_NONE && name) {
@@ -193,13 +303,8 @@ static void __lang_changed_cb(void *data, Evas_Object *grid, void *event_info)
 		}
 
 		app_info_destroy(app_info);
-
-next:
-		it = elm_gengrid_item_next_get(it);
 	}
 }
-
-
 
 Evas_Object *_grid_create(Evas_Object *page)
 {
@@ -208,7 +313,10 @@ Evas_Object *_grid_create(Evas_Object *page)
 	retv_if(!page, NULL);
 
 	grid = elm_gengrid_add(page);
-	goto_if(!grid, ERROR);
+	if (!grid) {
+		_grid_destroy(grid);
+		return NULL;
+	}
 
 	evas_object_size_hint_weight_set(grid, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
 	evas_object_size_hint_align_set(grid, EVAS_HINT_FILL, EVAS_HINT_FILL);
@@ -219,7 +327,11 @@ Evas_Object *_grid_create(Evas_Object *page)
 	elm_gengrid_multi_select_set(grid, EINA_FALSE);
 
 	grid_info.gic = elm_gengrid_item_class_new();
-	goto_if(!grid_info.gic, ERROR);
+	if (!grid_info.gic) {
+		_grid_destroy(grid);
+		return NULL;
+	}
+
 	grid_info.gic->func.text_get = __text_get;
 	grid_info.gic->func.content_get = __content_get;
 	grid_info.gic->func.state_get = NULL;
@@ -232,13 +344,7 @@ Evas_Object *_grid_create(Evas_Object *page)
 	evas_object_show(grid);
 
 	return grid;
-
-ERROR:
-	_grid_destroy(grid);
-	return NULL;
 }
-
-
 
 void _grid_destroy(Evas_Object *grid)
 {
@@ -247,31 +353,26 @@ void _grid_destroy(Evas_Object *grid)
 	evas_object_del(grid);
 }
 
-
-
 Elm_Object_Item *_grid_append_item(Evas_Object *grid, item_s *item_info)
 {
 	Elm_Object_Item *item = NULL;
 
 	retv_if(!grid, NULL);
 	retv_if(!item_info, NULL);
-
 	retv_if(!grid_info.gic, NULL);
 
 	item = elm_gengrid_item_append(grid, grid_info.gic, item_info, __item_selected, item_info);
 	retv_if(!item, NULL);
 	evas_object_data_set(item, PRIVATE_DATA_KEY_ITEM_INFO, item_info);
-	if (item_info->name) {
+	if (item_info->name)
 		_D("grid append item : %s", item_info->name);
-	}
+
 	item_info->grid_item = item;
 	elm_gengrid_item_show(item, ELM_GENGRID_ITEM_SCROLLTO_NONE);
 	elm_gengrid_item_update(item);
 
 	return item;
 }
-
-
 
 void _grid_remove_item(Evas_Object *grid, item_s *item_info)
 {
@@ -287,8 +388,6 @@ void _grid_remove_item(Evas_Object *grid, item_s *item_info)
 	elm_object_item_del(item);
 	item_info->grid_item = NULL;
 }
-
-
 
 int _grid_count_item(Evas_Object *grid)
 {

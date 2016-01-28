@@ -17,12 +17,9 @@
 #include <app.h>
 #include <app_control.h>
 #include <app_control_internal.h>
-#include <aul.h>
 #include <bundle.h>
 #include <bundle_internal.h>
-#include <efl_util.h>
 #include <Elementary.h>
-#include <isf_control.h>
 #include <system_settings.h>
 
 #include "share_panel.h"
@@ -41,12 +38,10 @@
 #define TRANSIT_DURATION 0.5f
 
 
-
 typedef struct custom_effect {
 	Evas_Coord from_h;
 	Evas_Coord to_h;
 } custom_effect_s;
-
 
 
 static Eina_Bool _back_key_pressed(void *data, Evas_Object *obj, Evas_Object *src, Evas_Callback_Type type, void *event_info)
@@ -60,14 +55,12 @@ static Eina_Bool _back_key_pressed(void *data, Evas_Object *obj, Evas_Object *sr
 	if (type == EVAS_CALLBACK_KEY_DOWN && !strncmp(KEY_BACK, ev->key, strlen(KEY_BACK))) {
 		_D("KEY PRESSED: %s", ev->key);
 
-		_ui_manager_reply_to_cancellation(share_panel);
 		ui_app_exit();
 		return EINA_TRUE;
 	} else {
 		return EINA_FALSE;
 	}
 }
-
 
 
 static void _rotate_cb(void *data, Evas_Object *obj, void *event)
@@ -102,7 +95,6 @@ static void _rotate_cb(void *data, Evas_Object *obj, void *event)
 }
 
 
-
 static Evas_Object *__create_win(share_panel_h share_panel)
 {
 	Evas_Object *win = NULL;
@@ -131,8 +123,6 @@ static Evas_Object *__create_win(share_panel_h share_panel)
 	elm_object_event_callback_add(win, _back_key_pressed, share_panel);
 	evas_object_smart_callback_add(win, "wm,rotation,changed", _rotate_cb, share_panel);
 
-	efl_util_set_window_opaque_state(win, 1);
-
 	elm_win_indicator_mode_set(win, ELM_WIN_INDICATOR_HIDE);
 	elm_win_borderless_set(win, EINA_TRUE);
 	evas_object_show(win);
@@ -149,12 +139,10 @@ error:
 }
 
 
-
 static void __destroy_win(Evas_Object *win)
 {
 	evas_object_del(win);
 }
-
 
 
 EAPI int share_panel_create(app_control_h control, share_panel_h *share_panel)
@@ -181,7 +169,6 @@ EAPI int share_panel_create(app_control_h control, share_panel_h *share_panel)
 	panel->page_height = ELM_SCALE_SIZE(SCROLLER_HEIGHT);
 
 	panel->control = control;
-	panel->after_launch = 0;
 
 	panel->ui_manager = _ui_manager_create(panel);
 	goto_if(!panel->ui_manager, ERROR);
@@ -203,14 +190,11 @@ ERROR:
 }
 
 
-
 EAPI int share_panel_destroy(share_panel_h share_panel)
 {
 	retv_if(!share_panel, SHARE_PANEL_ERROR_INVALID_PARAMETER);
 
-	if (share_panel->b) {
-		bundle_free(share_panel->b);
-	}
+	app_control_destroy(share_panel->control);
 	_ui_manager_destroy(share_panel->ui_manager);
 
 	if (share_panel->win) {
@@ -223,14 +207,12 @@ EAPI int share_panel_destroy(share_panel_h share_panel)
 }
 
 
-
 EAPI int share_panel_show(share_panel_h share_panel)
 {
 	retv_if(!share_panel, SHARE_PANEL_ERROR_INVALID_PARAMETER);
 
 	return _ui_manager_show(share_panel);
 }
-
 
 
 EAPI int share_panel_hide(share_panel_h share_panel)
@@ -241,14 +223,12 @@ EAPI int share_panel_hide(share_panel_h share_panel)
 }
 
 
-
 static bool _create_cb(void *data)
 {
 	elm_app_base_scale_set(1.7);
 
 	return true;
 }
-
 
 
 static void _terminate_cb(void *data)
@@ -260,7 +240,6 @@ static void _terminate_cb(void *data)
 	share_panel_hide(*share_panel);
 	share_panel_destroy(*share_panel);
 }
-
 
 
 static void _app_control(app_control_h control, void *data)
@@ -280,18 +259,6 @@ static void _app_control(app_control_h control, void *data)
 
 	share_panel_show(*share_panel);
 }
-
-
-
-static void _pause_cb(void *data)
-{
-	share_panel_h *share_panel = data;
-	_D("share_panel is paused");
-
-	if ((*share_panel)->after_launch)
-		ui_app_exit();
-}
-
 
 
 static void _language_changed(app_event_info_h event_info, void *data)
@@ -314,7 +281,6 @@ static void _language_changed(app_event_info_h event_info, void *data)
 }
 
 
-
 int main(int argc, char **argv)
 {
 	int ret;
@@ -324,7 +290,7 @@ int main(int argc, char **argv)
 
 	lifecycle_callback.create = _create_cb;
 	lifecycle_callback.terminate = _terminate_cb;
-	lifecycle_callback.pause = _pause_cb;
+	lifecycle_callback.pause = NULL;
 	lifecycle_callback.resume = NULL;
 	lifecycle_callback.app_control = _app_control;
 
