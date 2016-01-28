@@ -19,7 +19,7 @@
 
 #include <Elementary.h>
 
-Eina_List *_list_create(share_panel_h share_panel);
+Eina_List *_list_create(app_control_h control, bundle *b);
 void _list_destroy(Eina_List *list);
 
 #endif /* __TIZEN_SHARE_PANEL_LIST_H__ */

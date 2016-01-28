@@ -28,14 +28,12 @@
 #define PRIVATE_DATA_KEY_EVENT_CALLBACK_LIST "pdkec"
 
 
-
 struct _event_cb {
 	int event_type;
 	void (*event_cb)(Evas_Object *scroller, int event_type, void *event_info, void *user_data);
 	void *user_data;
 };
 typedef struct _event_cb event_cb_s;
-
 
 
 int _scroller_is_scrolling(Evas_Object *scroller)
@@ -45,13 +43,11 @@ int _scroller_is_scrolling(Evas_Object *scroller)
 }
 
 
-
 static void __anim_start_cb(void *data, Evas_Object *scroller, void *event_info)
 {
 	_D("start the scroller(%p) animation", scroller);
 	evas_object_data_set(scroller, PRIVATE_SCROLLER_IS_SCROLLING, (void *)1);
 }
-
 
 
 static void __anim_stop_cb(void *data, Evas_Object *scroller, void *event_info)
@@ -61,19 +57,16 @@ static void __anim_stop_cb(void *data, Evas_Object *scroller, void *event_info)
 }
 
 
-
 static void __drag_start_cb(void *data, Evas_Object *scroller, void *event_info)
 {
 	_D("start to drag the scroller(%p)", scroller);
 }
 
 
-
 static void __drag_stop_cb(void *data, Evas_Object *scroller, void *event_info)
 {
 	_D("stop to drag the scroller(%p) animation", scroller);
 }
-
 
 
 static void __scroll_cb(void *data, Evas_Object *scroller, void *event_info)
@@ -98,7 +91,6 @@ static void __scroll_cb(void *data, Evas_Object *scroller, void *event_info)
 		}
 	}
 }
-
 
 
 Evas_Object *_scroller_create(Evas_Object *ui_manager, share_panel_h share_panel)
@@ -150,7 +142,6 @@ ERROR:
 }
 
 
-
 void _scroller_destroy(Evas_Object *scroller)
 {
 	Evas_Object *box = NULL;
@@ -162,14 +153,12 @@ void _scroller_destroy(Evas_Object *scroller)
 		list = elm_box_children_get(box);
 		if (list) {
 			_scroller_remove_list(scroller, list);
-			eina_list_free(list);
 		}
 		evas_object_del(box);
 	}
 
 	evas_object_del(scroller);
 }
-
 
 
 void _scroller_append_page(Evas_Object *scroller, Evas_Object *page)
@@ -196,7 +185,6 @@ void _scroller_append_page(Evas_Object *scroller, Evas_Object *page)
 		}
 	}
 }
-
 
 
 void _scroller_remove_page(Evas_Object *scroller, Evas_Object *page)
@@ -242,7 +230,6 @@ void _scroller_remove_page(Evas_Object *scroller, Evas_Object *page)
 }
 
 
-
 void _scroller_append_list(Evas_Object *scroller, Eina_List *list, int page_width, int page_height)
 {
 	Evas_Object *page = NULL;
@@ -278,24 +265,21 @@ void _scroller_append_list(Evas_Object *scroller, Eina_List *list, int page_widt
 }
 
 
-
 void _scroller_remove_list(Evas_Object *scroller, Eina_List *list)
 {
 	Evas_Object *page = NULL;
 	Evas_Object *grid = NULL;
-	const Eina_List *l, *ln;
 
 	ret_if(!scroller);
 	ret_if(!list);
 
-	EINA_LIST_FOREACH_SAFE(list, l, ln, page) {
+	EINA_LIST_FREE(list, page) {
 		grid = elm_object_part_content_unset(page, "grid");
 		continue_if(!grid);
 		_grid_destroy(grid);
 		_page_destroy(page);
 	}
 }
-
 
 
 int _scroller_get_region_index(Evas_Object *scroller)
@@ -319,7 +303,6 @@ int _scroller_get_region_index(Evas_Object *scroller)
 }
 
 
-
 unsigned int _scroller_count(Evas_Object *scroller)
 {
 	Evas_Object *box = NULL;
@@ -339,7 +322,6 @@ unsigned int _scroller_count(Evas_Object *scroller)
 
 	return count;
 }
-
 
 
 void _scroller_bring_in_page(Evas_Object *scroller, Evas_Object *page)
@@ -375,7 +357,6 @@ void _scroller_bring_in_page(Evas_Object *scroller, Evas_Object *page)
 }
 
 
-
 void _scroller_resize(Evas_Object *scroller, int width, int height)
 {
 	Evas_Object *box = NULL;
@@ -403,7 +384,6 @@ void _scroller_resize(Evas_Object *scroller, int width, int height)
 }
 
 
-
 int _scroller_register_event_cb(Evas_Object *scroller, int event_type, void (*event_cb)(Evas_Object *scroller, int event_type, void *event_info, void *user_data), void *user_data)
 {
 	Eina_List *event_cb_list = NULL;
@@ -427,7 +407,6 @@ int _scroller_register_event_cb(Evas_Object *scroller, int event_type, void (*ev
 
 	return SHARE_PANEL_ERROR_NONE;
 }
-
 
 
 int _scroller_unregister_event_cb(Evas_Object *scroller, int event_type, void (*event_cb)(Evas_Object *scroller, int event_type, void *event_info, void *user_data))
