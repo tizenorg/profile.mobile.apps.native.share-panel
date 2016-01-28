@@ -1,9 +1,0 @@
-libdir=@LIBDIR@
-includedir=@INCLUDEDIR@
-
-Name: share-panel
-Description: share-panel supporting library
-Version: @VERSION@
-Requires: capi-base-common
-Libs: -L${libdir} -lshare-panel
-Cflags: -I${includedir}

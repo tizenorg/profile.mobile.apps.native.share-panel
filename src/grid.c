@@ -17,7 +17,7 @@
 #include <Elementary.h>
 #include <app.h>
 #include <app_manager.h>
-#include <aul.h>
+#include <app_control_internal.h>
 
 #include "share_panel_internal.h"
 #include "conf.h"
@@ -27,8 +27,6 @@
 #define PRIVATE_DATA_KEY_ITEM_INFO "pdkii"
 
 
-
-static const char *const FILE_LAYOUT_EDJ = EDJEDIR"/layout.edj";
 static struct {
 	Elm_Gengrid_Item_Class *gic;
 	char *default_icon;
@@ -40,7 +38,6 @@ static struct {
 
 	.index = 0,
 };
-
 
 
 static char *__text_get(void *data, Evas_Object *obj, const char *part)
@@ -133,7 +130,90 @@ static void __del(void *data, Evas_Object *obj)
 	evas_object_data_del(obj, PRIVATE_DATA_KEY_ITEM_INFO);
 }
 
+int _app_control_launch(item_s *item)
+{
+    int ret = APP_CONTROL_ERROR_NONE;
+    app_control_h app_control = NULL;
+    app_control_h caller_control = NULL;
+    char *uri = "";
+    char *operation = "";
+    char **data_array = NULL; // Array of file paths for multi share operation
+    int data_array_size = 0;
 
+    ret = app_control_create(&app_control);
+    if (ret != APP_CONTROL_ERROR_NONE)
+    	retv_if(ret, ret);
+
+    ret = app_control_create(&caller_control);
+    if (ret != APP_CONTROL_ERROR_NONE)
+    	retv_if(ret, ret);
+
+    ret = app_control_import_from_bundle(caller_control, item->b);
+    if (ret != APP_CONTROL_ERROR_NONE)
+    	retv_if(ret, ret);
+
+    ret = app_control_get_operation(caller_control, &operation);
+    if (ret != APP_CONTROL_ERROR_NONE)
+    	retv_if(ret, ret);
+
+    ret = app_control_get_uri(caller_control, &uri);
+    if (ret != APP_CONTROL_ERROR_NONE) {
+    	free(operation);
+    	retv_if(ret, ret);
+	}
+
+    ret = app_control_get_extra_data_array(caller_control, TIZEN_DATA_PATH, &data_array, &data_array_size);
+    if (ret != APP_CONTROL_ERROR_NONE) {
+    	free(operation);
+    	free(uri);
+    	retv_if(ret, ret);
+    }
+
+    _D("Operation: %s", operation);
+
+    ret = app_control_set_operation(app_control, operation);
+    if (ret != APP_CONTROL_ERROR_NONE)
+    	goto_if(ret, FREE_AND_EXIT);
+
+    ret = app_control_set_uri(app_control, uri);
+    if (ret != APP_CONTROL_ERROR_NONE)
+    	goto_if(ret, FREE_AND_EXIT);
+
+
+    ret = app_control_add_extra_data_array(app_control, TIZEN_DATA_PATH, (const char **)data_array, data_array_size);
+    if (ret != APP_CONTROL_ERROR_NONE)
+    	goto_if(ret, FREE_AND_EXIT);
+
+    ret = app_control_set_app_id(app_control, item->appid);
+    if (ret != APP_CONTROL_ERROR_NONE)
+    	goto_if(ret, FREE_AND_EXIT);
+
+    ret = app_control_set_launch_mode(app_control, APP_CONTROL_LAUNCH_MODE_GROUP);
+    if (ret != APP_CONTROL_ERROR_NONE)
+    	goto_if(ret, FREE_AND_EXIT);
+
+    ret = app_control_send_launch_request(app_control, NULL, NULL);
+    if (ret != APP_CONTROL_ERROR_NONE)
+    	goto_if(ret, FREE_AND_EXIT);
+
+    _D("app launched");
+
+FREE_AND_EXIT:
+	if(app_control)
+		app_control_destroy(app_control);
+
+	if(caller_control)
+		app_control_destroy(caller_control);
+
+	free(operation);
+	free(uri);
+
+	for (int i = 0; i < data_array_size; i++) {
+		free(data_array[i]);
+	}
+
+    return ret;
+}
 
 static void __item_selected(void *data, Evas_Object *obj, void *event_info)
 {
@@ -145,24 +225,19 @@ static void __item_selected(void *data, Evas_Object *obj, void *event_info)
 	ret_if(!item_info);
 	ret_if(!item_info->appid);
 	ret_if(!item_info->b);
-	ret_if(!item_info->share_panel);
 	_D("item clicked, launch app : %s", item_info->appid);
 
 	selected_item = elm_gengrid_selected_item_get(obj);
 	ret_if(!selected_item);
 	elm_gengrid_item_selected_set(selected_item, EINA_FALSE);
 
-
-	ret = aul_forward_app(item_info->appid, item_info->b);
+	ret = _app_control_launch(item_info);
 	if (ret < 0) {
 		_E("Fail to launch app(%d)", ret);
 	}
 
-	item_info->share_panel->after_launch = 1;
-	elm_object_signal_emit(item_info->share_panel->ui_manager, "show", "blocker");
+	ui_app_exit();
 }
-
-
 
 static void __lang_changed_cb(void *data, Evas_Object *grid, void *event_info)
 {
