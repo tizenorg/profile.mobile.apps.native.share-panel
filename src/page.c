@@ -20,19 +20,20 @@
 #include "conf.h"
 #include "log.h"
 #include "page.h"
+#include "utils.h"
 
-
-
-#define PAGE_EDJE_FILE EDJEDIR"/page.edj"
 Evas_Object *_page_create(Evas_Object *scroller, int page_width, int page_height)
 {
 	Evas_Object *page = NULL;
 	Evas_Object *page_bg = NULL;
 	Evas *e = NULL;
 
+	char *edj_subpath = "edje/page.edj";
+	char *edj_path = get_res_file_path(edj_subpath);
+
 	page = elm_layout_add(scroller);
 	retv_if(!page, NULL);
-	elm_layout_file_set(page, PAGE_EDJE_FILE, "page");
+	elm_layout_file_set(page, edj_path, "page");
 
 	e = evas_object_evas_get(scroller);
 	goto_if(!e, ERROR);
@@ -48,9 +49,11 @@ Evas_Object *_page_create(Evas_Object *scroller, int page_width, int page_height
 	elm_object_part_content_set(page, "bg", page_bg);
 
 	evas_object_show(page);
+	free(edj_path);
 	return page;
 
 ERROR:
+	free(edj_path);
 	_page_destroy(page);
 	return NULL;
 }
