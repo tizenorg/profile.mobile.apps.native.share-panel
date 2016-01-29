@@ -30,8 +30,8 @@
 #include "scroller.h"
 #include "conf.h"
 #include "ui_manager.h"
+#include "utils.h"
 
-#define FILE_LAYOUT_EDJ EDJEDIR"/layout.edj"
 #define GROUP_LAYOUT "layout"
 
 
@@ -165,7 +165,9 @@ Evas_Object *_ui_manager_create(share_panel_s *share_panel)
 	ui_manager = elm_layout_add(share_panel->win);
 	retv_if(!ui_manager, NULL);
 
-	elm_layout_file_set(ui_manager, FILE_LAYOUT_EDJ, GROUP_LAYOUT);
+	char *edj_path = get_res_file_path("edje/layout.edj");
+
+	elm_layout_file_set(ui_manager, edj_path, GROUP_LAYOUT);
 	evas_object_size_hint_weight_set(ui_manager, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
 	evas_object_size_hint_align_set(ui_manager, EVAS_HINT_FILL, EVAS_HINT_FILL);
 	evas_object_show(ui_manager);
@@ -228,9 +230,11 @@ Evas_Object *_ui_manager_create(share_panel_s *share_panel)
 
 	edje_object_message_signal_process(edje);
 
+	free(edj_path);
 	return ui_manager;
 
 ERROR:
+	free(edj_path);
 	_ui_manager_destroy(ui_manager);
 	return NULL;
 }

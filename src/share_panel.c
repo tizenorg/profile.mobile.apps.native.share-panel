@@ -28,6 +28,7 @@
 #include "ui_manager.h"
 #include "log.h"
 #include "scroller.h"
+#include "utils.h"
 
 #ifdef EAPI
 #undef EAPI
@@ -152,7 +153,9 @@ EAPI int share_panel_create(app_control_h control, share_panel_h *share_panel)
 	retv_if(!share_panel, SHARE_PANEL_ERROR_INVALID_PARAMETER);
 	retv_if(!control, SHARE_PANEL_ERROR_INVALID_PARAMETER);
 
-	bindtextdomain(SHARE_PANEL_DOMAIN, LOCALEDIR);
+	char * locale_path = get_res_file_path("locale");
+
+	bindtextdomain(SHARE_PANEL_DOMAIN, locale_path);
 
 	panel = calloc(1, sizeof(share_panel_s));
 	retv_if(!panel, SHARE_PANEL_ERROR_NOT_INITIALIZED);
@@ -178,6 +181,8 @@ EAPI int share_panel_create(app_control_h control, share_panel_h *share_panel)
 
 	*share_panel = panel;
 
+	free(locale_path);
+
 	return SHARE_PANEL_ERROR_NONE;
 
 ERROR:
@@ -185,6 +190,7 @@ ERROR:
 		_ui_manager_destroy(panel->ui_manager);
 	}
 	free(panel);
+	free(locale_path);
 
 	return SHARE_PANEL_ERROR_NOT_INITIALIZED;
 }
