@@ -60,7 +60,7 @@ static char *__text_get(void *data, Evas_Object *obj, const char *part)
 	return NULL;
 }
 
-#define FILE_ITEM_EDJ EDJEDIR"/item.edj"
+
 static Evas_Object *__add_icon(Evas_Object *parent, const char *file)
 {
 	const char *real_icon_file = NULL;
@@ -92,12 +92,16 @@ static Evas_Object *__add_icon(Evas_Object *parent, const char *file)
 	icon_layout = elm_layout_add(parent);
 	retv_if(!icon_layout, NULL);
 
-	elm_layout_file_set(icon_layout, FILE_ITEM_EDJ, "grid,icon");
+	char *edj_path = utils_get_res_file_path("edje/item.edj");
+
+	elm_layout_file_set(icon_layout, edj_path, "grid,icon");
 	evas_object_size_hint_weight_set(icon_layout, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
 	evas_object_size_hint_align_set(icon_layout, EVAS_HINT_FILL, EVAS_HINT_FILL);
 	evas_object_show(icon_layout);
 
 	elm_object_part_content_set(icon_layout, "icon", icon);
+
+	free(edj_path);
 
 	return icon_layout;
 }
