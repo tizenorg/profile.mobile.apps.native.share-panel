@@ -16,16 +16,15 @@
 
 #include <app.h>
 #include <app_control_internal.h>
-#include <aul.h>
 #include <bundle.h>
 #include <bundle_internal.h>
 #include <Elementary.h>
-#include <aul_svc.h>
 #include <notification.h>
 
 #include "share_panel_internal.h"
 #include "share_panel.h"
 #include "log.h"
+#include "grid.h"
 #include "list.h"
 #include "page.h"
 #include "index.h"
@@ -35,7 +34,6 @@
 
 #define FILE_LAYOUT_EDJ EDJEDIR"/layout.edj"
 #define GROUP_LAYOUT "layout"
-
 
 
 static void __resize_cb(void *data, Evas *e, Evas_Object *obj, void *event_info)
@@ -49,7 +47,6 @@ static void __resize_cb(void *data, Evas *e, Evas_Object *obj, void *event_info)
 	evas_object_geometry_get(ui_manager, &x, &y, &w, &h);
 	_D("%s resize(%d, %d, %d, %d)", data, x, y, w, h);
 }
-
 
 
 static void _scroll_cb(Evas_Object *scroller, int event_type, void *event_info, void *data)
@@ -66,7 +63,6 @@ static void _scroll_cb(Evas_Object *scroller, int event_type, void *event_info, 
 }
 
 
-
 static void _append_page_cb(Evas_Object *scroller, int event_type, void *event_info, void *data)
 {
 	Evas_Object *index = data;
@@ -79,7 +75,6 @@ static void _append_page_cb(Evas_Object *scroller, int event_type, void *event_i
 
 	_D("Index was updated as %d", count);
 }
-
 
 
 static void _remove_page_cb(Evas_Object *scroller, int event_type, void *event_info, void *data)
@@ -96,7 +91,6 @@ static void _remove_page_cb(Evas_Object *scroller, int event_type, void *event_i
 }
 
 
-
 static void __click_back_btn_cb(void *data, Evas_Object *obj, void *event_info)
 {
 	share_panel_s *share_panel = data;
@@ -104,10 +98,8 @@ static void __click_back_btn_cb(void *data, Evas_Object *obj, void *event_info)
 	ret_if(!share_panel);
 
 	_D("back button clicked, destroy the share-panel");
-	_ui_manager_reply_to_cancellation(share_panel);
 	share_panel_destroy(share_panel);
 }
-
 
 
 Evas_Object *__create_back_btn(Evas_Object *ui_manager, share_panel_s *share_panel)
@@ -130,14 +122,12 @@ Evas_Object *__create_back_btn(Evas_Object *ui_manager, share_panel_s *share_pan
 }
 
 
-
 void __destroy_back_btn(Evas_Object *button)
 {
 	ret_if(!button);
 
 	evas_object_del(button);
 }
-
 
 
 Evas_Object *__create_bg_rect(Evas_Object *ui_manager, int width, int height)
@@ -158,14 +148,12 @@ Evas_Object *__create_bg_rect(Evas_Object *ui_manager, int width, int height)
 }
 
 
-
 void __destroy_bg_rect(Evas_Object *bg)
 {
 	ret_if(!bg);
 
 	evas_object_del(bg);
 }
-
 
 
 Evas_Object *_ui_manager_create(share_panel_s *share_panel)
@@ -202,13 +190,16 @@ Evas_Object *_ui_manager_create(share_panel_s *share_panel)
 	goto_if(!share_panel->scroller, ERROR);
 	elm_object_part_content_set(ui_manager, "scroller", share_panel->scroller);
 
-	if (SHARE_PANEL_ERROR_NONE != _scroller_register_event_cb(share_panel->scroller, SCROLLER_EVENT_TYPE_SCROLL, _scroll_cb, share_panel->index)) {
+	if (SHARE_PANEL_ERROR_NONE != _scroller_register_event_cb(share_panel->scroller,
+			SCROLLER_EVENT_TYPE_SCROLL, _scroll_cb, share_panel->index)) {
 		_E("cannot register the scroller event");
 	}
-	if (SHARE_PANEL_ERROR_NONE != _scroller_register_event_cb(share_panel->scroller, SCROLLER_EVENT_TYPE_APPEND_PAGE, _append_page_cb, share_panel->index)) {
+	if (SHARE_PANEL_ERROR_NONE != _scroller_register_event_cb(share_panel->scroller,
+			SCROLLER_EVENT_TYPE_APPEND_PAGE, _append_page_cb, share_panel->index)) {
 		_E("cannot register the scroller event");
 	}
-	if (SHARE_PANEL_ERROR_NONE != _scroller_register_event_cb(share_panel->scroller, SCROLLER_EVENT_TYPE_REMOVE_PAGE, _remove_page_cb, share_panel->index)) {
+	if (SHARE_PANEL_ERROR_NONE != _scroller_register_event_cb(share_panel->scroller,
+			SCROLLER_EVENT_TYPE_REMOVE_PAGE, _remove_page_cb, share_panel->index)) {
 		_E("cannot register the scroller event");
 	}
 
@@ -224,12 +215,12 @@ Evas_Object *_ui_manager_create(share_panel_s *share_panel)
 		item_s *item_info = NULL;
 		int ret = 0;
 
-		_D("item list is 1, launch app right");
+		_D("Only one item on the list. Launching.");
 
 		item_info = eina_list_nth(share_panel->list, 0);
 		goto_if(!item_info, ERROR);
 
-		ret = aul_forward_app(item_info->appid, item_info->b);
+		_app_control_launch(item_info);
 		if (ret < 0) {
 			_E("Fail to launch app(%d)", ret);
 		}
@@ -262,7 +253,6 @@ ERROR:
 }
 
 
-
 void _ui_manager_destroy(Evas_Object *ui_manager)
 {
 	Evas_Object *button = NULL;
@@ -274,6 +264,7 @@ void _ui_manager_destroy(Evas_Object *ui_manager)
 	ret_if(!share_panel);
 
 	if (share_panel->list) {
+		_scroller_remove_list(share_panel->scroller, share_panel->list);
 		_list_destroy(share_panel->list);
 	}
 
@@ -302,7 +293,6 @@ void _ui_manager_destroy(Evas_Object *ui_manager)
 }
 
 
-
 void _ui_manager_resize(Evas_Object *ui_manager, int width, int height)
 {
 	ret_if(!ui_manager);
@@ -313,7 +303,6 @@ void _ui_manager_resize(Evas_Object *ui_manager, int width, int height)
 	evas_object_move(ui_manager, 0, 0);
 	edje_object_message_signal_process(elm_layout_edje_get(ui_manager));
 }
-
 
 
 int _ui_manager_show(share_panel_h share_panel)
@@ -329,7 +318,6 @@ int _ui_manager_show(share_panel_h share_panel)
 }
 
 
-
 int _ui_manager_hide(share_panel_h share_panel)
 {
 	retv_if(!share_panel, SHARE_PANEL_ERROR_INVALID_PARAMETER);
@@ -339,49 +327,4 @@ int _ui_manager_hide(share_panel_h share_panel)
 	evas_object_hide(share_panel->ui_manager);
 
 	return SHARE_PANEL_ERROR_NONE;
-}
-
-
-
-void _ui_manager_reply_to_cancellation(share_panel_h share_panel)
-{
-	bundle *kb = NULL;
-	const char *pid = NULL;
-	char callee_pid[20] = {0, };
-	int ret;
-
-	ret_if(!share_panel);
-	ret_if(!share_panel->b);
-	pid = bundle_get_val(share_panel->b, AUL_K_CALLER_PID);
-	ret_if(!pid);
-
-	kb = bundle_create();
-	ret_if(!kb);
-
-	ret = bundle_add(kb, AUL_K_SEND_RESULT, "1");
-	if (ret != BUNDLE_ERROR_NONE) {
-		_E("Fail to bundle add (%d)", ret);
-		goto OUT;
-	}
-
-	ret = bundle_add(kb, AUL_K_CALLER_PID, pid);
-	if (ret != BUNDLE_ERROR_NONE) {
-		_E("Fail to bundle add (%d)", ret);
-		goto OUT;
-	}
-
-	snprintf(callee_pid, sizeof(callee_pid), "%d", getpid());
-	ret = bundle_add(kb, AUL_K_CALLEE_PID, (const char *) callee_pid);
-	if (ret != BUNDLE_ERROR_NONE) {
-		_E("Fail to bundle add (%d)", ret);
-		goto OUT;
-	}
-
-	ret = aul_svc_send_result(kb, AUL_SVC_RES_CANCEL);
-	if (ret != AUL_R_OK) {
-		_E("aul svc send result error(%d)", ret);
-	}
-
-OUT:
-	bundle_free(kb);
 }

@@ -27,4 +27,6 @@ extern void _grid_remove_item(Evas_Object *grid, item_s *item_info);
 
 extern int _grid_count_item(Evas_Object *grid);
 
+int _app_control_launch(item_s *item);
+
 #endif /* __TIZEN_SHARE_PANEL_GRID_H__ */
