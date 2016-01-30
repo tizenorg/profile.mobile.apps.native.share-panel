@@ -40,7 +40,5 @@
 
 #define PROJECT "share-panel"
 #define PACKAGE "org.tizen.share-panel"
-#define LOCALEDIR  "res/locale"
-#define EDJEDIR "res/edje"
 
 #endif /* __TIZEN_SHARE_PANEL_CONF_H__ */
