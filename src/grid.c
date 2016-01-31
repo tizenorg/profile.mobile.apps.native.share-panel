@@ -155,9 +155,13 @@ static void __item_selected(void *data, Evas_Object *obj, void *event_info)
 	ret_if(!item_info->share_panel);
 	_D("item clicked, launch app : %s", item_info->appid);
 
-	selected_item = elm_gengrid_selected_item_get(obj);
-		ret_if(!selected_item);
-	elm_gengrid_item_selected_set(selected_item, EINA_FALSE);
+
+//	TODO
+//	Temporary commented to avoid double invoke. This is a bug. JIRA issue have been raised.
+//
+//	selected_item = elm_gengrid_selected_item_get(obj);
+//		ret_if(!selected_item);
+//	elm_gengrid_item_selected_set(selected_item, EINA_FALSE);
 
 
 	ret = _app_control_launch(item_info);
