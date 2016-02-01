@@ -125,6 +125,15 @@ static void __del(void *data, Evas_Object *obj)
 	evas_object_data_del(obj, PRIVATE_DATA_KEY_ITEM_INFO);
 }
 
+void _app_reply_cb (app_control_h request, app_control_h reply,
+						app_control_result_e result, void *user_data)
+{
+	if (result == APP_CONTROL_RESULT_APP_STARTED || result == APP_CONTROL_RESULT_SUCCEEDED){
+
+	}
+	ui_app_exit();
+}
+
 int _app_control_launch(item_s *item)
 {
 	retv_if(!item->caller_control, APP_CONTROL_ERROR_INVALID_PARAMETER);
@@ -134,7 +143,7 @@ int _app_control_launch(item_s *item)
 	ret = app_control_set_app_id(item->caller_control, item->appid);
 	retv_if(ret != APP_CONTROL_ERROR_NONE, ret);
 
-	ret = app_control_send_launch_request(item->caller_control, NULL, NULL);
+	ret = app_control_send_launch_request(item->caller_control, _app_reply_cb, NULL);
 	retv_if(ret != APP_CONTROL_ERROR_NONE, ret);
 
 	_D("app launched");
