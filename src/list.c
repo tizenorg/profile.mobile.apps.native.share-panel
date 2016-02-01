@@ -17,13 +17,13 @@
 #include <Elementary.h>
 #include <app_control.h>
 #include <app_manager.h>
-#include <glib.h>
 #include <mime_type.h>
 #include <bundle.h>
 
 #include "share_panel.h"
 #include "share_panel_internal.h"
 #include "log.h"
+#include "grid.h"
 
 
 static bool __app_control_matched_cb(app_control_h service, const char *appid, void *user_data)
@@ -280,7 +280,7 @@ static void __make_applist(share_panel_h share_panel, Eina_List *matchlist, Eina
 	int ret = 0;
 
 	ret_if(!share_panel);
-	ret_if(!share_panel->b);
+	ret_if(!share_panel->control);
 
 	EINA_LIST_FOREACH(matchlist, l, data) {
 		item_s *app_s = NULL;
@@ -295,8 +295,13 @@ static void __make_applist(share_panel_h share_panel, Eina_List *matchlist, Eina
 			free(app_s);
 			continue;
 		}
-		app_s->b = share_panel->b;
-		app_s->share_panel = share_panel;
+		ret = app_control_clone(&(app_s->caller_control), share_panel->control);
+		if (ret != APP_CONTROL_ERROR_NONE) {
+			_E("fail to clone the share_panel->control");
+			free(app_s->appid);
+			free(app_s);
+			continue;
+		}
 
 		ret = app_info_create(data, &app_info);
 		if (ret != APP_MANAGER_ERROR_NONE || !app_info) {
@@ -339,14 +344,13 @@ static void __make_applist(share_panel_h share_panel, Eina_List *matchlist, Eina
 
 Eina_List *_list_create(share_panel_h share_panel)
 {
-	Eina_List *matchlist = NULL;
-	Eina_List *applist  = NULL;
+	Eina_List *matchlist = NULL; // List of ID's of matched apps
+	Eina_List *applist  = NULL;  // List of item_s's of matched apps
 	char *operation_type = NULL;
 	char *data = NULL;
 
 	retv_if(!share_panel, NULL);
 	retv_if(!share_panel->control, NULL);
-	retv_if(!share_panel->b, NULL);
 
 	app_control_get_operation(share_panel->control, &operation_type);
 	retv_if(!operation_type, NULL);
@@ -377,7 +381,16 @@ Eina_List *_list_create(share_panel_h share_panel)
 
 void _list_destroy(Eina_List *list)
 {
+	item_s * item = NULL;
 	ret_if(!list);
+	EINA_LIST_FREE(list, item) {
+		_grid_remove_item(NULL, item);
+		app_control_destroy(item->caller_control);
+		free(item->appid);
+		free(item->name);
+		free(item->icon);
+		free(item);
+	}
 	eina_list_free(list);
 }
 

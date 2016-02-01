@@ -65,7 +65,7 @@ typedef struct _share_panel share_panel_s;
 
 
 struct _item {
-	bundle *b;
+	app_control_h caller_control;
 	share_panel_s *share_panel;
 
 	char *appid;
