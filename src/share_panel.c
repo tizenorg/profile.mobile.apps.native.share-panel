@@ -16,9 +16,6 @@
 
 #include <app.h>
 #include <app_control.h>
-#include <app_control_internal.h>
-#include <bundle.h>
-#include <bundle_internal.h>
 #include <Elementary.h>
 #include <efl_util.h>
 #include <system_settings.h>
@@ -166,8 +163,6 @@ EAPI int share_panel_create(app_control_h control, share_panel_h *share_panel)
 		return SHARE_PANEL_ERROR_NOT_INITIALIZED;
 	}
 
-	app_control_export_as_bundle(control, &(panel->b));
-
 	goto_if(!__create_win(panel), ERROR);
 
 	if (panel->root_width > panel->root_height) {
@@ -207,9 +202,6 @@ EAPI int share_panel_destroy(share_panel_h share_panel)
 {
 	retv_if(!share_panel, SHARE_PANEL_ERROR_INVALID_PARAMETER);
 
-	if (share_panel->b) {
-		bundle_free(share_panel->b);
-	}
 	_ui_manager_destroy(share_panel->ui_manager);
 
 	if (share_panel->win) {

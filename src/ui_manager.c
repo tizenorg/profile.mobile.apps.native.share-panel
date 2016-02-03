@@ -15,9 +15,6 @@
  */
 
 #include <app.h>
-#include <app_control_internal.h>
-#include <bundle.h>
-#include <bundle_internal.h>
 #include <Elementary.h>
 #include <notification.h>
 

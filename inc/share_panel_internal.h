@@ -50,7 +50,6 @@ struct _share_panel {
 	Ecore_Idler *append_idler;
 	Elm_Transit *transit;
 	app_control_h control;
-	bundle *b;
 
 	int root_width;
 	int root_height;
@@ -65,7 +64,7 @@ typedef struct _share_panel share_panel_s;
 
 
 struct _item {
-	bundle *b;
+	app_control_h caller_control;
 	share_panel_s *share_panel;
 
 	char *appid;

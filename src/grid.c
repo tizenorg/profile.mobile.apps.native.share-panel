@@ -18,7 +18,6 @@
 #include <app.h>
 #include <app_manager.h>
 #include <app_control.h>
-#include <bundle.h>
 
 #include "share_panel_internal.h"
 #include "conf.h"
@@ -27,17 +26,6 @@
 #include "utils.h"
 
 #define PRIVATE_DATA_KEY_ITEM_INFO "pdkii"
-
-struct _launch_data {
-	app_control_h app_control;
-    app_control_h caller_control;
-    char *uri;
-    char *operation;
-    char **data_array;
-    int data_array_size;
-};
-
-typedef struct _launch_data launch_data_t;
 
 static struct {
 	Elm_Gengrid_Item_Class *gic;
@@ -136,136 +124,40 @@ static void __del(void *data, Evas_Object *obj)
 	evas_object_data_del(obj, PRIVATE_DATA_KEY_ITEM_INFO);
 }
 
-static void _app_control_launch_release(launch_data_t launch_data)
-{
-	int i;
-
-	if(launch_data.app_control)
-		app_control_destroy(launch_data.app_control);
-
-	if(launch_data.caller_control)
-		app_control_destroy(launch_data.caller_control);
-
-	free(launch_data.operation);
-	free(launch_data.uri);
-
-	if (!launch_data.data_array)
-		return;
-
-	for (i = 0; i < launch_data.data_array_size; i++)
-		free(launch_data.data_array[i]);
-}
-
-static bool _app_control_error_handle(launch_data_t launch_data, int ret_value, const char *func_name)
-{
-	if (ret_value != APP_CONTROL_ERROR_NONE) {
-		_app_control_launch_release(launch_data);
-		_E("(ret != APP_CONTROL_ERROR_NONE) -> %s() return", func_name);
-		return true;
-	}
-
-	return false;
-}
-
-static void __bundle_data_foreach_cb(const char *key, const int type, const bundle_keyval_t *kv, void *user_data)
-{
-	app_control_h app_control = (app_control_h)user_data;
-	int ret;
-	void *val = NULL;
-	size_t size = 0;
-	void **array_val = NULL;
-	unsigned int array_len = 0;
-	size_t *array_elem_size = NULL;
-
-	if (bundle_keyval_type_is_array((bundle_keyval_t *)kv)) {
-		ret = bundle_keyval_get_array_val((bundle_keyval_t *)kv, &array_val, &array_len, &array_elem_size);
-		ret_if(ret != BUNDLE_ERROR_NONE);
-
-		ret = app_control_add_extra_data_array(app_control, key, (const char **)array_val, array_len);
-		ret_if(ret != APP_CONTROL_ERROR_NONE);
-	} else {
-		ret = bundle_keyval_get_basic_val((bundle_keyval_t *)kv, &val, &size);
-		ret_if(ret != BUNDLE_ERROR_NONE);
-
-		app_control_add_extra_data(app_control, key, (const char *)val);
-		ret_if(ret != APP_CONTROL_ERROR_NONE);
-	}
-}
-
 int _app_control_launch(item_s *item)
 {
-	int ret = APP_CONTROL_ERROR_NONE;
-	launch_data_t launch_data = {0,};
+	retv_if(!item->caller_control, APP_CONTROL_ERROR_INVALID_PARAMETER);
 
-	ret = app_control_create(&launch_data.app_control);
+	int ret = APP_CONTROL_ERROR_NONE;
+
+	ret = app_control_set_app_id(item->caller_control, item->appid);
 	retv_if(ret != APP_CONTROL_ERROR_NONE, ret);
 
-	ret = app_control_create(&launch_data.caller_control);
-	if (_app_control_error_handle(launch_data, ret, "app_control_create"))
-		return ret;
-
-	bundle_foreach(item->b, __bundle_data_foreach_cb, (void *)launch_data.caller_control);
-
-	ret = app_control_get_operation(launch_data.caller_control, &launch_data.operation);
-	if (_app_control_error_handle(launch_data, ret, "app_control_get_operation"))
-		return ret;
-
-	ret = app_control_get_uri(launch_data.caller_control, &launch_data.uri);
-	if (_app_control_error_handle(launch_data, ret, "app_control_get_uri"))
-		return ret;
-
-	ret = app_control_get_extra_data_array(launch_data.caller_control, TIZEN_DATA_PATH, &launch_data.data_array, &launch_data.data_array_size);
-	if (_app_control_error_handle(launch_data, ret, "app_control_get_extra_data_array"))
-		return ret;
-
-	_D("Operation: %s", launch_data.operation);
-
-	ret = app_control_set_operation(launch_data.app_control, launch_data.operation);
-	if (_app_control_error_handle(launch_data, ret, "app_control_set_operation"))
-		return ret;
-
-	ret = app_control_set_uri(launch_data.app_control, launch_data.uri);
-	if (_app_control_error_handle(launch_data, ret, "app_control_set_uri"))
-		return ret;
-
-	ret = app_control_add_extra_data_array(launch_data.app_control, TIZEN_DATA_PATH, (const char **)launch_data.data_array, launch_data.data_array_size);
-	if (_app_control_error_handle(launch_data, ret, "app_control_add_extra_data_array"))
-		return ret;
-
-	ret = app_control_set_app_id(launch_data.app_control, item->appid);
-	if (_app_control_error_handle(launch_data, ret, "app_control_set_app_id"))
-		return ret;
-
-	ret = app_control_set_launch_mode(launch_data.app_control, APP_CONTROL_LAUNCH_MODE_GROUP);
-	if (_app_control_error_handle(launch_data, ret, "app_control_set_launch_mode"))
-		return ret;
-
-	ret = app_control_send_launch_request(launch_data.app_control, NULL, NULL);
-	if (_app_control_error_handle(launch_data, ret, "app_control_send_launch_request"))
-		return ret;
+	ret = app_control_send_launch_request(item->caller_control, NULL, NULL);
+	retv_if(ret != APP_CONTROL_ERROR_NONE, ret);
 
 	_D("app launched");
 
-	_app_control_launch_release(launch_data);
 	return ret;
 }
 
 static void __item_selected(void *data, Evas_Object *obj, void *event_info)
 {
-	item_s *item_info = data;
+	_D("__item_selected");
+	item_s *item_info = (item_s *) data;
 	Elm_Object_Item *selected_item = NULL;
 
 	int ret = 0;
 
 	ret_if(!item_info);
 	ret_if(!item_info->appid);
-	ret_if(!item_info->b);
 	ret_if(!item_info->share_panel);
 	_D("item clicked, launch app : %s", item_info->appid);
 
 	selected_item = elm_gengrid_selected_item_get(obj);
 	ret_if(!selected_item);
 	elm_gengrid_item_selected_set(selected_item, EINA_FALSE);
+
 
 	ret = _app_control_launch(item_info);
 	if (ret < 0)
