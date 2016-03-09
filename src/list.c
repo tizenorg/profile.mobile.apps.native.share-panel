@@ -36,7 +36,7 @@ static bool __app_control_matched_cb(app_control_h service, const char *appid, v
 
 	app_control_get_caller(service, &caller);
 
-	_SD("matched app : [%s]", appid);
+	_D("matched app : [%s]", appid);
 	if (caller && !strcmp(appid, caller)) {
 		_D("caller and callee is same");
 		return true;
