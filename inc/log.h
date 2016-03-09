@@ -28,28 +28,17 @@
 #define D_(str) dgettext(PACKAGE, str)
 
 #if !defined(_D)
-#define _D(fmt, arg...) LOGD(fmt"\n", ##arg)
+#define _D(fmt, arg...) dlog_print(DLOG_DEBUG, LOG_TAG, fmt"\n", ##arg)
 #endif
 
 #if !defined(_W)
-#define _W(fmt, arg...) LOGW(fmt"\n", ##arg)
+#define _W(fmt, arg...) dlog_print(DLOG_WARN, LOG_TAG, fmt"\n", ##arg)
 #endif
 
 #if !defined(_E)
-#define _E(fmt, arg...) LOGE(fmt"\n", ##arg)
+#define _E(fmt, arg...) dlog_print(DLOG_ERROR, LOG_TAG, fmt"\n", ##arg)
 #endif
 
-#if !defined(_SD)
-#define _SD(fmt, arg...) SECURE_LOGD(fmt"\n", ##arg)
-#endif
-
-#if !defined(_SW)
-#define _SW(fmt, arg...) SECURE_LOGW(fmt"\n", ##arg)
-#endif
-
-#if !defined(_SE)
-#define _SE(fmt, arg...) SECURE_LOGE(fmt"\n", ##arg)
-#endif
 
 #define retv_if(expr, val) do { \
 	if(expr) { \

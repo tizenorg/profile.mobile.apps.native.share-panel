@@ -36,7 +36,7 @@ static bool __app_control_matched_cb(app_control_h service, const char *appid, v
 
 	app_control_get_caller(service, &caller);
 
-	_SD("matched app : [%s]", appid);
+	_D("matched app : [%s]", appid);
 	if (caller && !strcmp(appid, caller)) {
 		_D("caller and callee is same");
 		return true;
@@ -152,13 +152,13 @@ static void __intersect_match_list_with_mime(Eina_List **matchlist, const char *
 		exist = false;
 		EINA_LIST_FOREACH(sublist, sub_ln, s_list_data) {
 			if (!strcmp(m_list_data, s_list_data)) {
-				_SD("[%s] is inlcude!", m_list_data);
+				_D("[%s] is inlcude!", m_list_data);
 				exist = true;
 				break;
 			}
 		}
 		if (!exist) {
-			_SD("[%s] is not include!", m_list_data);
+			_D("[%s] is not include!", m_list_data);
 			*matchlist = eina_list_remove(*matchlist, m_list_data);
 		}
 	}
@@ -177,7 +177,7 @@ static void __trim_uri(app_control_h control)
 	char *tmp = NULL;
 
 	app_control_get_uri(control, &uri);
-	_SD("uri : [[[%s]]]", uri);
+	_D("uri : [[[%s]]]", uri);
 	if (!uri) {
 		return;
 	}
@@ -227,7 +227,7 @@ static void __create_multi_share_list(app_control_h control, Eina_List **matchli
 		Eina_List *l = NULL;
 		char *tmp = NULL;
 
-		_SD("data_array[%d]= %s", i, data_array[i]);
+		_D("data_array[%d]= %s", i, data_array[i]);
 
 		__get_mime(data_array[i], &mime);
 		if (!mime) {
@@ -243,7 +243,7 @@ static void __create_multi_share_list(app_control_h control, Eina_List **matchli
 		}
 
 		mime_list = eina_list_prepend(mime_list, mime);
-		_SD("data_array[%d]= %s", i, data_array[i]);
+		_D("data_array[%d]= %s", i, data_array[i]);
 
 out:
 		free(data_array[i]);
@@ -318,7 +318,7 @@ static void __make_applist(share_panel_h share_panel, Eina_List *matchlist, Eina
 			app_info_destroy(app_info);
 			continue;
 		}
-		_SD("icon_name : [%s]", app_s->name);
+		_D("icon_name : [%s]", app_s->name);
 
 		ret = app_info_get_icon(app_info, &app_s->icon);
 		if (ret != APP_MANAGER_ERROR_NONE) {
@@ -334,7 +334,7 @@ static void __make_applist(share_panel_h share_panel, Eina_List *matchlist, Eina
 		if (!app_s->icon) {
 			app_s->icon = strdup(DEFAULT_ICON);
 		}
-		_SD("icon_path : [%s]", app_s->icon);
+		_D("icon_path : [%s]", app_s->icon);
 
 		*applist = eina_list_sorted_insert(*applist, __applist_compare, app_s);
 	}
