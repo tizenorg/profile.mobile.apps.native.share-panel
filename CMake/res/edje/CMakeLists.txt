@@ -1,0 +1,23 @@
+ADD_CUSTOM_TARGET(item.edj
+		COMMAND edje_cc -id ${PROJECT_EDC_DIR}/../images ${EDJE_CFLAGS}
+		${PROJECT_EDC_DIR}/item.edc item.edj
+		DEPENDS ${PROJECT_EDC_DIR}/item.edc
+)
+ADD_DEPENDENCIES(${PROJECT_NAME} item.edj)
+INSTALL(FILES item.edj DESTINATION ${EDJEDIR})
+
+ADD_CUSTOM_TARGET(layout.edj
+		COMMAND edje_cc -id ${PROJECT_EDC_DIR}/../images ${EDJE_CFLAGS}
+		${PROJECT_EDC_DIR}/layout.edc layout.edj
+		DEPENDS ${PROJECT_EDC_DIR}/layout.edc
+)
+ADD_DEPENDENCIES(${PROJECT_NAME} layout.edj)
+INSTALL(FILES layout.edj DESTINATION ${EDJEDIR})
+
+ADD_CUSTOM_TARGET(page.edj
+		COMMAND edje_cc -id ${PROJECT_EDC_DIR}/../images ${EDJE_CFLAGS}
+		${PROJECT_EDC_DIR}/page.edc page.edj
+		DEPENDS ${PROJECT_EDC_DIR}/page.edc
+)
+ADD_DEPENDENCIES(${PROJECT_NAME} page.edj)
+INSTALL(FILES page.edj DESTINATION ${EDJEDIR})
