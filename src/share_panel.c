@@ -297,7 +297,7 @@ static void _language_changed(app_event_info_h event_info, void *data)
 }
 
 
-int main(int argc, char **argv)
+EAPI int main(int argc, char **argv)
 {
 	int ret;
 	ui_app_lifecycle_callback_s lifecycle_callback = {0, };
