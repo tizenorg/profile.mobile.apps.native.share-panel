@@ -24,6 +24,18 @@
 
 char *utils_get_res_file_path(char *sub_path)
 {
+/* Fix for support for global and user installation
+ * In case of global installation resoureces should be fetched from
+ * predefined directory
+ *
+ * In case of multi-user installation resources shoudl be fetched using
+ * app_get_resource_path API.
+ */
+#ifdef INSTALL_RESDIR
+	char buf[1024];
+	snprintf(buf, sizeof(buf), "%s/%s", INSTALL_RESDIR, sub_path);
+	return strdup(buf);
+#else
 	char *res_path = app_get_resource_path();
 	if(!res_path)
 		return NULL;
@@ -41,4 +53,5 @@ char *utils_get_res_file_path(char *sub_path)
 	free(res_path);
 
 	return absolute_path;
+#endif
 }
