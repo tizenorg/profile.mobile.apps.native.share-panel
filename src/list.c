@@ -137,7 +137,7 @@ static void __intersect_match_list_with_mime(Eina_List **matchlist, const char *
 	bool exist;
 
 	app_control_create(&control);
-	app_control_set_operation(control, TIZEN_MULTI_SHARE);
+	app_control_set_operation(control, APP_CONTROL_OPERATION_MULTI_SHARE);
 	app_control_set_mime(control, mime);
 	app_control_set_uri(control, uri);
 	app_control_foreach_app_matched(control, __app_control_file_matched_cb, &sublist);
@@ -356,11 +356,11 @@ Eina_List *_list_create(share_panel_h share_panel)
 
 	__trim_uri(share_panel->control);
 
-	if (!strcmp(operation_type, TIZEN_SHARE)
-		|| !strcmp(operation_type, TIZEN_SHARE_TEXT)) {
+	if (!strcmp(operation_type, APP_CONTROL_OPERATION_SHARE)
+		|| !strcmp(operation_type, APP_CONTROL_OPERATION_SHARE_TEXT)) {
 		_D("single share operation");
 		__create_single_share_list(share_panel->control, &matchlist);
-	} else if (!strcmp(operation_type, TIZEN_MULTI_SHARE)) {
+	} else if (!strcmp(operation_type, APP_CONTROL_OPERATION_MULTI_SHARE)) {
 		_D("multi share operation");
 		__create_multi_share_list(share_panel->control, &matchlist);
 	} else {

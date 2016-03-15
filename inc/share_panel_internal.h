@@ -25,9 +25,6 @@
 #define TABBAR_NAME_MORE "More"
 #define BUF_SIZE 128
 #define TIZEN_DATA_PATH "http://tizen.org/appcontrol/data/path"
-#define TIZEN_SHARE "http://tizen.org/appcontrol/operation/share"
-#define TIZEN_MULTI_SHARE "http://tizen.org/appcontrol/operation/multi_share"
-#define TIZEN_SHARE_TEXT "http://tizen.org/appcontrol/operation/share_text"
 #define DEFAULT_ICON "/usr/share/icons/A01-1_icon_Menu.png"
 #define KEY_BACK "XF86Back"
 
