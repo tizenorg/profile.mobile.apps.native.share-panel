@@ -17,7 +17,7 @@ ExcludeArch: %{arm} %ix86 x86_64
 BuildRequires: cmake
 BuildRequires: edje-tools
 BuildRequires: gettext-tools
-
+BuildRequires: hash-signer
 BuildRequires: pkgconfig(appcore-efl)
 BuildRequires: pkgconfig(aul)
 BuildRequires: pkgconfig(capi-appfw-application)
@@ -77,5 +77,5 @@ cd -
 %{_pkg_dir}/res/images/*.png
 %{_sys_packages_dir}/%{name}.xml
 %{_sys_icons_dir}/share-panel.png
-
-
+%{_pkg_dir}/author-signature.xml
+%{_pkg_dir}/signature1.xml
