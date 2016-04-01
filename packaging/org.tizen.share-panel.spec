@@ -1,6 +1,6 @@
 Name:       org.tizen.share-panel
-#VCS_FROM:   profile/mobile/apps/native/share-panel#43129501c2772e36ea0b2902aee14f84f448a828
-#RS_Ver:    20160330_6
+#VCS_FROM:   profile/mobile/apps/native/share-panel#df08c6121d7e3dcee44e51f51957f8066cd4406b
+#RS_Ver:    20160401_4
 Summary:    App in rpm
 Version:    1.0.0
 Release:    1
