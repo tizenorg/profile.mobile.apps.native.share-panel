@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "conf.edc"
+#include "../../inc/conf.h"
 
 styles {
 	style {

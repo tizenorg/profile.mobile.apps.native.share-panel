@@ -17,13 +17,12 @@
 #include <Elementary.h>
 #include <app_control.h>
 #include <app_manager.h>
-#include <glib.h>
 #include <mime_type.h>
 
 #include "share_panel.h"
 #include "share_panel_internal.h"
 #include "log.h"
-
+#include "grid.h"
 
 
 static bool __app_control_matched_cb(app_control_h service, const char *appid, void *user_data)
@@ -37,7 +36,7 @@ static bool __app_control_matched_cb(app_control_h service, const char *appid, v
 
 	app_control_get_caller(service, &caller);
 
-	_SD("matched app : [%s]", appid);
+	_D("matched app : [%s]", appid);
 	if (caller && !strcmp(appid, caller)) {
 		_D("caller and callee is same");
 		return true;
@@ -50,12 +49,10 @@ static bool __app_control_matched_cb(app_control_h service, const char *appid, v
 }
 
 
-
 static void __create_single_share_list(app_control_h control, Eina_List **list)
 {
 	app_control_foreach_app_matched(control, __app_control_matched_cb, list);
 }
-
 
 
 static int __get_file_ext(const char *filepath, char **file_ext)
@@ -81,7 +78,6 @@ static int __get_file_ext(const char *filepath, char **file_ext)
 		return -1;
 	}
 }
-
 
 
 static inline void __get_mime(const char *file_path, char **mime)
@@ -119,7 +115,6 @@ static inline void __get_mime(const char *file_path, char **mime)
 }
 
 
-
 static bool __app_control_file_matched_cb(app_control_h service, const char *appid, void *user_data)
 {
 	Eina_List **sublist = user_data;
@@ -127,7 +122,6 @@ static bool __app_control_file_matched_cb(app_control_h service, const char *app
 	*sublist = eina_list_append(*sublist, strdup(appid));
 	return true;
 }
-
 
 
 static void __intersect_match_list_with_mime(Eina_List **matchlist, const char *mime, const char *uri)
@@ -143,7 +137,7 @@ static void __intersect_match_list_with_mime(Eina_List **matchlist, const char *
 	bool exist;
 
 	app_control_create(&control);
-	app_control_set_operation(control, TIZEN_MULTI_SHARE);
+	app_control_set_operation(control, APP_CONTROL_OPERATION_MULTI_SHARE);
 	app_control_set_mime(control, mime);
 	app_control_set_uri(control, uri);
 	app_control_foreach_app_matched(control, __app_control_file_matched_cb, &sublist);
@@ -158,13 +152,13 @@ static void __intersect_match_list_with_mime(Eina_List **matchlist, const char *
 		exist = false;
 		EINA_LIST_FOREACH(sublist, sub_ln, s_list_data) {
 			if (!strcmp(m_list_data, s_list_data)) {
-				_SD("[%s] is inlcude!", m_list_data);
+				_D("[%s] is inlcude!", m_list_data);
 				exist = true;
 				break;
 			}
 		}
 		if (!exist) {
-			_SD("[%s] is not include!", m_list_data);
+			_D("[%s] is not include!", m_list_data);
 			*matchlist = eina_list_remove(*matchlist, m_list_data);
 		}
 	}
@@ -177,14 +171,13 @@ static void __intersect_match_list_with_mime(Eina_List **matchlist, const char *
 }
 
 
-
 static void __trim_uri(app_control_h control)
 {
 	char *uri = NULL;
 	char *tmp = NULL;
 
 	app_control_get_uri(control, &uri);
-	_SD("uri : [[[%s]]]", uri);
+	_D("uri : [[[%s]]]", uri);
 	if (!uri) {
 		return;
 	}
@@ -205,8 +198,6 @@ static void __trim_uri(app_control_h control)
 	free(uri);
 }
 
-
-
 #define CONTACT_MIME "application/vnd.tizen.contact"
 static void __create_multi_share_list(app_control_h control, Eina_List **matchlist)
 {
@@ -218,7 +209,7 @@ static void __create_multi_share_list(app_control_h control, Eina_List **matchli
 
 	int i;
 	int length = 0;
-	int res;
+	int ret;
 
 	app_control_get_mime(control, &contact_mime);
 
@@ -227,16 +218,16 @@ static void __create_multi_share_list(app_control_h control, Eina_List **matchli
 		__intersect_match_list_with_mime(matchlist, contact_mime, uri);
 		return;
 	} else {
-		res = app_control_get_extra_data_array(control, TIZEN_DATA_PATH, &data_array, &length);
-		if (res != APP_CONTROL_ERROR_NONE) {
-			_E("app_control_get_extra_data_array failed..[%d]", res);
+		ret = app_control_get_extra_data_array(control, TIZEN_DATA_PATH, &data_array, &length);
+		if (ret != APP_CONTROL_ERROR_NONE) {
+			_E("app_control_get_extra_data_array failed..[%d]", ret);
 		}
 	}
 	for (i = 0; i < length; i++) {
 		Eina_List *l = NULL;
 		char *tmp = NULL;
 
-		_SD("data_array[%d]= %s", i, data_array[i]);
+		_D("data_array[%d]= %s", i, data_array[i]);
 
 		__get_mime(data_array[i], &mime);
 		if (!mime) {
@@ -252,7 +243,7 @@ static void __create_multi_share_list(app_control_h control, Eina_List **matchli
 		}
 
 		mime_list = eina_list_prepend(mime_list, mime);
-		_SD("data_array[%d]= %s", i, data_array[i]);
+		_D("data_array[%d]= %s", i, data_array[i]);
 
 out:
 		free(data_array[i]);
@@ -270,17 +261,15 @@ out:
 }
 
 
-
 static int __applist_compare(const void *com1, const void *com2)
 {
 	item_s *c1 = (item_s *)com1, *c2 = (item_s *)com2;
-	int res = 0;
+	int ret = 0;
 
-	res = strcasecmp(c1->name, c2->name);
+	ret = strcasecmp(c1->name, c2->name);
 
-	return res;
+	return ret;
 }
-
 
 
 static void __make_applist(share_panel_h share_panel, Eina_List *matchlist, Eina_List **applist)
@@ -290,7 +279,7 @@ static void __make_applist(share_panel_h share_panel, Eina_List *matchlist, Eina
 	int ret = 0;
 
 	ret_if(!share_panel);
-	ret_if(!share_panel->b);
+	ret_if(!share_panel->control);
 
 	EINA_LIST_FOREACH(matchlist, l, data) {
 		item_s *app_s = NULL;
@@ -305,8 +294,13 @@ static void __make_applist(share_panel_h share_panel, Eina_List *matchlist, Eina
 			free(app_s);
 			continue;
 		}
-		app_s->b = share_panel->b;
-		app_s->share_panel = share_panel;
+		ret = app_control_clone(&(app_s->caller_control), share_panel->control);
+		if (ret != APP_CONTROL_ERROR_NONE) {
+			_E("fail to clone the share_panel->control");
+			free(app_s->appid);
+			free(app_s);
+			continue;
+		}
 
 		ret = app_info_create(data, &app_info);
 		if (ret != APP_MANAGER_ERROR_NONE || !app_info) {
@@ -324,7 +318,7 @@ static void __make_applist(share_panel_h share_panel, Eina_List *matchlist, Eina
 			app_info_destroy(app_info);
 			continue;
 		}
-		_SD("icon_name : [%s]", app_s->name);
+		_D("icon_name : [%s]", app_s->name);
 
 		ret = app_info_get_icon(app_info, &app_s->icon);
 		if (ret != APP_MANAGER_ERROR_NONE) {
@@ -340,35 +334,33 @@ static void __make_applist(share_panel_h share_panel, Eina_List *matchlist, Eina
 		if (!app_s->icon) {
 			app_s->icon = strdup(DEFAULT_ICON);
 		}
-		_SD("icon_path : [%s]", app_s->icon);
+		_D("icon_path : [%s]", app_s->icon);
 
 		*applist = eina_list_sorted_insert(*applist, __applist_compare, app_s);
 	}
 }
 
 
-
 Eina_List *_list_create(share_panel_h share_panel)
 {
-	Eina_List *matchlist = NULL;
-	Eina_List *applist  = NULL;
+	Eina_List *matchlist = NULL; // List of ID's of matched apps
+	Eina_List *applist  = NULL;  // List of item_s's of matched apps
 	char *operation_type = NULL;
 	char *data = NULL;
 
 	retv_if(!share_panel, NULL);
 	retv_if(!share_panel->control, NULL);
-	retv_if(!share_panel->b, NULL);
 
 	app_control_get_operation(share_panel->control, &operation_type);
 	retv_if(!operation_type, NULL);
 
 	__trim_uri(share_panel->control);
 
-	if (!strcmp(operation_type, TIZEN_SHARE)
-		|| !strcmp(operation_type, TIZEN_SHARE_TEXT)) {
+	if (!strcmp(operation_type, APP_CONTROL_OPERATION_SHARE)
+		|| !strcmp(operation_type, APP_CONTROL_OPERATION_SHARE_TEXT)) {
 		_D("single share operation");
 		__create_single_share_list(share_panel->control, &matchlist);
-	} else if (!strcmp(operation_type, TIZEN_MULTI_SHARE)) {
+	} else if (!strcmp(operation_type, APP_CONTROL_OPERATION_MULTI_SHARE)) {
 		_D("multi share operation");
 		__create_multi_share_list(share_panel->control, &matchlist);
 	} else {
@@ -386,10 +378,19 @@ Eina_List *_list_create(share_panel_h share_panel)
 }
 
 
-
 void _list_destroy(Eina_List *list)
 {
+	item_s * item = NULL;
 	ret_if(!list);
+	EINA_LIST_FREE(list, item) {
+		ret_if(!item);
+		_grid_remove_item(NULL, item);
+		app_control_destroy(item->caller_control);
+		free(item->appid);
+		free(item->name);
+		free(item->icon);
+		free(item);
+	}
 	eina_list_free(list);
 }
 

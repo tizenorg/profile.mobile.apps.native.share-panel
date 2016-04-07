@@ -25,9 +25,6 @@
 #define TABBAR_NAME_MORE "More"
 #define BUF_SIZE 128
 #define TIZEN_DATA_PATH "http://tizen.org/appcontrol/data/path"
-#define TIZEN_SHARE "http://tizen.org/appcontrol/operation/share"
-#define TIZEN_MULTI_SHARE "http://tizen.org/appcontrol/operation/multi_share"
-#define TIZEN_SHARE_TEXT "http://tizen.org/appcontrol/operation/share_text"
 #define DEFAULT_ICON "/usr/share/icons/A01-1_icon_Menu.png"
 #define KEY_BACK "XF86Back"
 
@@ -50,7 +47,6 @@ struct _share_panel {
 	Ecore_Idler *append_idler;
 	Elm_Transit *transit;
 	app_control_h control;
-	bundle *b;
 
 	int root_width;
 	int root_height;
@@ -65,7 +61,7 @@ typedef struct _share_panel share_panel_s;
 
 
 struct _item {
-	bundle *b;
+	app_control_h caller_control;
 	share_panel_s *share_panel;
 
 	char *appid;

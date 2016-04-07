@@ -17,31 +17,25 @@
 #include <Elementary.h>
 #include <app.h>
 #include <app_manager.h>
-#include <aul.h>
+#include <app_control.h>
 
 #include "share_panel_internal.h"
 #include "conf.h"
 #include "grid.h"
 #include "log.h"
+#include "utils.h"
 
 #define PRIVATE_DATA_KEY_ITEM_INFO "pdkii"
 
-
-
-static const char *const FILE_LAYOUT_EDJ = EDJEDIR"/layout.edj";
 static struct {
 	Elm_Gengrid_Item_Class *gic;
 	char *default_icon;
-
 	int index;
 } grid_info = {
 	.gic = NULL,
 	.default_icon = "/usr/share/icons/A01-1_icon_Menu.png",
-
 	.index = 0,
 };
-
-
 
 static char *__text_get(void *data, Evas_Object *obj, const char *part)
 {
@@ -49,16 +43,13 @@ static char *__text_get(void *data, Evas_Object *obj, const char *part)
 	retv_if(!info, NULL);
 
 	retv_if(!info->name, NULL);
-	if (!strcmp(part, "elm.text")) {
+	if (!strcmp(part, "elm.text"))
 		return strdup(D_(info->name));
-	}
 
 	return NULL;
 }
 
 
-
-#define FILE_ITEM_EDJ EDJEDIR"/item.edj"
 static Evas_Object *__add_icon(Evas_Object *parent, const char *file)
 {
 	const char *real_icon_file = NULL;
@@ -90,17 +81,19 @@ static Evas_Object *__add_icon(Evas_Object *parent, const char *file)
 	icon_layout = elm_layout_add(parent);
 	retv_if(!icon_layout, NULL);
 
-	elm_layout_file_set(icon_layout, FILE_ITEM_EDJ, "grid,icon");
+	char *edj_path = utils_get_res_file_path("edje/item.edj");
+
+	elm_layout_file_set(icon_layout, edj_path, "grid,icon");
 	evas_object_size_hint_weight_set(icon_layout, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
 	evas_object_size_hint_align_set(icon_layout, EVAS_HINT_FILL, EVAS_HINT_FILL);
 	evas_object_show(icon_layout);
 
 	elm_object_part_content_set(icon_layout, "icon", icon);
 
+	free(edj_path);
+
 	return icon_layout;
 }
-
-
 
 static Evas_Object *__content_get(void *data, Evas_Object *obj, const char *part)
 {
@@ -125,44 +118,67 @@ static Evas_Object *__content_get(void *data, Evas_Object *obj, const char *part
 	return NULL;
 }
 
-
-
 static void __del(void *data, Evas_Object *obj)
 {
 	ret_if(NULL == data);
 	evas_object_data_del(obj, PRIVATE_DATA_KEY_ITEM_INFO);
 }
 
+void _app_reply_cb (app_control_h request, app_control_h reply,
+						app_control_result_e result, void *user_data)
+{
+	if (result == APP_CONTROL_RESULT_APP_STARTED || result == APP_CONTROL_RESULT_SUCCEEDED)
+	ui_app_exit();
+}
 
+int _app_control_launch(item_s *item)
+{
+	retv_if(!item->caller_control, APP_CONTROL_ERROR_INVALID_PARAMETER);
+
+	int ret = APP_CONTROL_ERROR_NONE;
+
+	ret = app_control_set_app_id(item->caller_control, item->appid);
+	retv_if(ret != APP_CONTROL_ERROR_NONE, ret);
+
+	ret = app_control_send_launch_request(item->caller_control, _app_reply_cb, NULL);
+	retv_if(ret != APP_CONTROL_ERROR_NONE, ret);
+
+	_D("app launched");
+
+	return ret;
+}
 
 static void __item_selected(void *data, Evas_Object *obj, void *event_info)
 {
-	item_s *item_info = data;
-	Elm_Object_Item *selected_item = NULL;
+	_D("__item_selected");
+	item_s *item_info = (item_s *) data;
+
+//	See explanation in another comment below
+//	Elm_Object_Item *selected_item = NULL;
 
 	int ret = 0;
 
 	ret_if(!item_info);
 	ret_if(!item_info->appid);
-	ret_if(!item_info->b);
 	ret_if(!item_info->share_panel);
 	_D("item clicked, launch app : %s", item_info->appid);
 
-	selected_item = elm_gengrid_selected_item_get(obj);
-	ret_if(!selected_item);
-	elm_gengrid_item_selected_set(selected_item, EINA_FALSE);
+//	TODO
+//	Temporary commented to avoid double invoke. This is a bug. JIRA issue have been raised.
+//
+//	selected_item = elm_gengrid_selected_item_get(obj);
+//	ret_if(!selected_item);
+//	elm_gengrid_item_selected_set(selected_item, EINA_FALSE);
 
 
-	ret = aul_forward_app(item_info->appid, item_info->b);
-	if (ret < 0) {
+	ret = _app_control_launch(item_info);
+	if (ret < 0)
 		_E("Fail to launch app(%d)", ret);
-	}
 
 	item_info->share_panel->after_launch = 1;
+
 	elm_object_signal_emit(item_info->share_panel->ui_manager, "show", "blocker");
 }
-
-
 
 static void __lang_changed_cb(void *data, Evas_Object *grid, void *event_info)
 {
@@ -177,10 +193,16 @@ static void __lang_changed_cb(void *data, Evas_Object *grid, void *event_info)
 		char *name = NULL;
 
 		item_info = evas_object_data_get(it, PRIVATE_DATA_KEY_ITEM_INFO);
-		goto_if(!item_info, next);
+		if (!item_info) {
+			it = elm_gengrid_item_next_get(it);
+			continue;
+		}
 
 		ret = app_info_create(item_info->appid, &app_info);
-		goto_if(ret != APP_MANAGER_ERROR_NONE && !app_info, next);
+		if (ret != APP_MANAGER_ERROR_NONE && !app_info) {
+			it = elm_gengrid_item_next_get(it);
+			continue;
+		}
 
 		ret = app_info_get_label(app_info, &name);
 		if (ret == APP_MANAGER_ERROR_NONE && name) {
@@ -193,13 +215,8 @@ static void __lang_changed_cb(void *data, Evas_Object *grid, void *event_info)
 		}
 
 		app_info_destroy(app_info);
-
-next:
-		it = elm_gengrid_item_next_get(it);
 	}
 }
-
-
 
 Evas_Object *_grid_create(Evas_Object *page)
 {
@@ -208,7 +225,10 @@ Evas_Object *_grid_create(Evas_Object *page)
 	retv_if(!page, NULL);
 
 	grid = elm_gengrid_add(page);
-	goto_if(!grid, ERROR);
+	if (!grid) {
+		_grid_destroy(grid);
+		return NULL;
+	}
 
 	evas_object_size_hint_weight_set(grid, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
 	evas_object_size_hint_align_set(grid, EVAS_HINT_FILL, EVAS_HINT_FILL);
@@ -219,7 +239,11 @@ Evas_Object *_grid_create(Evas_Object *page)
 	elm_gengrid_multi_select_set(grid, EINA_FALSE);
 
 	grid_info.gic = elm_gengrid_item_class_new();
-	goto_if(!grid_info.gic, ERROR);
+	if (!grid_info.gic) {
+		_grid_destroy(grid);
+		return NULL;
+	}
+
 	grid_info.gic->func.text_get = __text_get;
 	grid_info.gic->func.content_get = __content_get;
 	grid_info.gic->func.state_get = NULL;
@@ -232,13 +256,7 @@ Evas_Object *_grid_create(Evas_Object *page)
 	evas_object_show(grid);
 
 	return grid;
-
-ERROR:
-	_grid_destroy(grid);
-	return NULL;
 }
-
-
 
 void _grid_destroy(Evas_Object *grid)
 {
@@ -247,31 +265,26 @@ void _grid_destroy(Evas_Object *grid)
 	evas_object_del(grid);
 }
 
-
-
 Elm_Object_Item *_grid_append_item(Evas_Object *grid, item_s *item_info)
 {
 	Elm_Object_Item *item = NULL;
 
 	retv_if(!grid, NULL);
 	retv_if(!item_info, NULL);
-
 	retv_if(!grid_info.gic, NULL);
 
 	item = elm_gengrid_item_append(grid, grid_info.gic, item_info, __item_selected, item_info);
 	retv_if(!item, NULL);
 	evas_object_data_set(item, PRIVATE_DATA_KEY_ITEM_INFO, item_info);
-	if (item_info->name) {
+	if (item_info->name)
 		_D("grid append item : %s", item_info->name);
-	}
+
 	item_info->grid_item = item;
 	elm_gengrid_item_show(item, ELM_GENGRID_ITEM_SCROLLTO_NONE);
 	elm_gengrid_item_update(item);
 
 	return item;
 }
-
-
 
 void _grid_remove_item(Evas_Object *grid, item_s *item_info)
 {
@@ -287,8 +300,6 @@ void _grid_remove_item(Evas_Object *grid, item_s *item_info)
 	elm_object_item_del(item);
 	item_info->grid_item = NULL;
 }
-
-
 
 int _grid_count_item(Evas_Object *grid)
 {

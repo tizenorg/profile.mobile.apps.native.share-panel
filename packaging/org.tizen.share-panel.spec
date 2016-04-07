@@ -1,11 +1,8 @@
-%define Exec share-panel
-%define AppInstallPath /usr/apps/%{name}
-
 Name:       org.tizen.share-panel
 Summary:    Share Panel
 Version:    0.1.0
 Release:    0
-Group:      Application
+Group:      Applications/Core Applications
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 
@@ -20,7 +17,7 @@ ExcludeArch: %{arm} %ix86 x86_64
 BuildRequires: cmake
 BuildRequires: edje-tools
 BuildRequires: gettext-tools
-
+BuildRequires: hash-signer
 BuildRequires: pkgconfig(appcore-efl)
 BuildRequires: pkgconfig(aul)
 BuildRequires: pkgconfig(capi-appfw-application)
@@ -38,6 +35,7 @@ BuildRequires: pkgconfig(evas)
 BuildRequires: pkgconfig(feedback)
 BuildRequires: pkgconfig(isf)
 BuildRequires: pkgconfig(notification)
+BuildRequires: pkgconfig(libtzplatform-config)
 
 %description
 Description: Share Panel
@@ -45,39 +43,39 @@ Description: Share Panel
 %prep
 %setup -q
 
-%package devel
-Summary:    Share panel library (devel)
-Group:      Application
-Requires:   %{name} = %{version}-%{release}
-
-%description devel
-Development files needed to build software that needs Share panel.
-
 %build
-export CFLAGS="$CFLAGS -DTIZEN_DEBUG_ENABLE"
-export CXXFLAGS="$CXXFLAGS -DTIZEN_DEBUG_ENABLE"
-export FFLAGS="$FFLAGS -DTIZEN_DEBUG_ENABLE"
+%define _pkg_dir %{TZ_SYS_RO_APP}/%{name}
+%define _pkg_shared_dir %{_pkg_dir}/shared
+%define _pkg_data_dir %{_pkg_dir}/data
+%define _sys_icons_dir %{_pkg_shared_dir}/res
+%define _sys_packages_dir %{TZ_SYS_RO_PACKAGES}
+%define _sys_license_dir %{TZ_SYS_SHARE}/license
 
-%if 0%{?tizen_build_binary_release_type_eng}
-export CFLAGS="$CFLAGS -DTIZEN_ENGINEER_MODE"
-export CXXFLAGS="$CXXFLAGS -DTIZEN_ENGINEER_MODE"
-export FFLAGS="$FFLAGS -DTIZEN_ENGINEER_MODE"
-%endif
-
-%cmake . -DCMAKE_INSTALL_PREFIX="%{AppInstallPath}" -DCMAKE_TARGET="%{Exec}" -DCMAKE_PACKAGE="%{name}"
+cd CMake
+cmake . -DINSTALL_PREFIX=%{_pkg_dir} \
+	-DSYS_ICONS_DIR=%{_sys_icons_dir} \
+	-DSYS_PACKAGES_DIR=%{_sys_packages_dir}
 make %{?jobs:-j%jobs}
+cd -
 
 %install
-rm -rf %{buildroot}
+cd CMake
 %make_install
+cd -
 
-%post
+%define tizen_sign 1
+%define tizen_sign_base %{_pkg_dir}
+%define tizen_sign_level public
+%define tizen_author_sign 1
+%define tizen_dist_sign 1
+%find_lang share-panel
 
-%files
+%files -f share-panel.lang
 %manifest %{name}.manifest
-%{AppInstallPath}/bin/share-panel
-%{AppInstallPath}/res/*
-%{_datarootdir}/packages/%{name}.xml
-%{AppInstallPath}/res/locale/*/LC_MESSAGES/*
-
-
+%{_pkg_dir}/bin/share-panel
+%{_pkg_dir}/res/edje/*.edj
+%{_pkg_dir}/res/images/*.png
+%{_sys_packages_dir}/%{name}.xml
+%{_sys_icons_dir}/share-panel.png
+%{_pkg_dir}/author-signature.xml
+%{_pkg_dir}/signature1.xml

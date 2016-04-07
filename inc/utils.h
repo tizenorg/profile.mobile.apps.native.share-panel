@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-#ifndef __TIZEN_SHARE_PANEL_GRID_H__
-#define __TIZEN_SHARE_PANEL_GRID_H__
+#ifndef UTILS_H_
+#define UTILS_H_
 
-#include <Elementary.h>
+/**
+ * @param sub_path sub path in res/ folder
+ *
+ * @return Absolute path for sub_path
+ * @remarks	The returned path should be released.
+ */
 
-extern Evas_Object *_grid_create(Evas_Object *page);
-extern void _grid_destroy(Evas_Object *grid);
+char *utils_get_res_file_path(char *sub_path);
 
-extern Elm_Object_Item *_grid_append_item(Evas_Object *grid, item_s *item_info);
-extern void _grid_remove_item(Evas_Object *grid, item_s *item_info);
 
-extern int _grid_count_item(Evas_Object *grid);
-
-#endif /* __TIZEN_SHARE_PANEL_GRID_H__ */
+#endif /* UTILS_H_ */
