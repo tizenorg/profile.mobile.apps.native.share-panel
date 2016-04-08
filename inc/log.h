@@ -19,6 +19,9 @@
 
 #include <dlog.h>
 
+#define OK		(0)
+#define FAIL	(-1)
+
 #undef LOG_TAG
 #define LOG_TAG "SHARE_PANEL"
 
@@ -39,6 +42,13 @@
 #define _E(fmt, arg...) dlog_print(DLOG_ERROR, LOG_TAG, fmt"\n", ##arg)
 #endif
 
+#define retvm_if(expr, val, fmt, arg...) do { \
+	if(expr) { \
+		_E(fmt, ##arg); \
+		_E("(%s) -> %s() return", #expr, __FUNCTION__); \
+		return val; \
+	} \
+} while (0)
 
 #define retv_if(expr, val) do { \
 	if(expr) { \

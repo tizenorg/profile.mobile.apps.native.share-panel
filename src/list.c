@@ -340,6 +340,25 @@ static void __make_applist(share_panel_h share_panel, Eina_List *matchlist, Eina
 	}
 }
 
+static int check_mime(app_control_h control, char* operation_type)
+{
+	if (!strcmp(operation_type, APP_CONTROL_OPERATION_SHARE)
+			|| !strcmp(operation_type, APP_CONTROL_OPERATION_MULTI_SHARE)) {
+		char *mime;
+		int ret = app_control_get_mime(control, &mime);
+		retvm_if(ret != APP_CONTROL_ERROR_NONE, FAIL, "app_control_get_mime failed[%d]", ret);
+		if (mime == NULL) {
+			ret = app_control_set_mime(control, "*/*");
+			if (ret != APP_CONTROL_ERROR_NONE) {
+				_E("app_control_set_mime failed[%d]", ret);
+				free(mime);
+				return FAIL;
+			}
+		}
+		free(mime);
+	}
+	return OK;
+}
 
 Eina_List *_list_create(share_panel_h share_panel)
 {
@@ -353,6 +372,8 @@ Eina_List *_list_create(share_panel_h share_panel)
 
 	app_control_get_operation(share_panel->control, &operation_type);
 	retv_if(!operation_type, NULL);
+
+	retv_if(check_mime(share_panel->control, operation_type) == FAIL, NULL);
 
 	__trim_uri(share_panel->control);
 
