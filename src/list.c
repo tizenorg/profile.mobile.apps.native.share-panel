@@ -336,6 +336,7 @@ static void __make_applist(share_panel_h share_panel, Eina_List *matchlist, Eina
 		}
 		_D("icon_path : [%s]", app_s->icon);
 
+		app_s->share_panel = share_panel;
 		*applist = eina_list_sorted_insert(*applist, __applist_compare, app_s);
 	}
 }
