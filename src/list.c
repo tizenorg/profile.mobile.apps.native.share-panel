@@ -171,33 +171,6 @@ static void __intersect_match_list_with_mime(Eina_List **matchlist, const char *
 }
 
 
-static void __trim_uri(app_control_h control)
-{
-	char *uri = NULL;
-	char *tmp = NULL;
-
-	app_control_get_uri(control, &uri);
-	_D("uri : [[[%s]]]", uri);
-	if (!uri) {
-		return;
-	}
-
-	if (!strncmp(uri, "/", 1)) {
-		tmp = uri;
-	} else if (!strncmp(uri, "file:///", 8)) {
-		tmp = &uri[7];
-	} else {
-		_E("file uri scheme is wrong");
-		free(uri);
-		return;
-	}
-
-	_D("set uri is [[[%s]]]", tmp);
-
-	app_control_set_uri(control, tmp);
-	free(uri);
-}
-
 #define CONTACT_MIME "application/vnd.tizen.contact"
 static void __create_multi_share_list(app_control_h control, Eina_List **matchlist)
 {
@@ -375,8 +348,6 @@ Eina_List *_list_create(share_panel_h share_panel)
 	retv_if(!operation_type, NULL);
 
 	retv_if(check_mime(share_panel->control, operation_type) == FAIL, NULL);
-
-	__trim_uri(share_panel->control);
 
 	if (!strcmp(operation_type, APP_CONTROL_OPERATION_SHARE)
 		|| !strcmp(operation_type, APP_CONTROL_OPERATION_SHARE_TEXT)) {
