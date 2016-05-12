@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <manifest xmlns="http://tizen.org/ns/packages" api-version="3.0" install-location="internal-only" package="org.tizen.share-panel" version="1.0.0">
     <profile name="mobile"/>
-    <ui-application appid="org.tizen.share-panel" exec="share-panel" hw-acceleration="on" launch_mode="group" multiple="false" nodisplay="true" type="capp">
+    <ui-application appid="org.tizen.share-panel" exec="share-panel" hw-acceleration="on" process-pool="true" launch_mode="group" multiple="false" nodisplay="true" type="capp">
         <label>share-panel</label>
         <icon>share-panel.png</icon>
     </ui-application>
