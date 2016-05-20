@@ -68,6 +68,12 @@ cd -
 %define tizen_sign_level public
 %define tizen_author_sign 1
 %define tizen_dist_sign 1
+%define _sys_license_dir %{TZ_SYS_SHARE}/license
+
+mkdir -p %{buildroot}/%{_sys_license_dir}
+cp LICENSE %{buildroot}/%{_sys_license_dir}/%{name}
+
+
 %find_lang share-panel
 
 %files -f share-panel.lang
@@ -76,6 +82,7 @@ cd -
 %{_pkg_dir}/res/edje/*.edj
 %{_pkg_dir}/res/images/*.png
 %{_sys_packages_dir}/%{name}.xml
+%{_sys_license_dir}/%{name}
 %{_sys_icons_dir}/share-panel.png
 %{_pkg_dir}/author-signature.xml
 %{_pkg_dir}/signature1.xml
