@@ -17,9 +17,12 @@
 #include <Elementary.h>
 #include <app.h>
 #include <app_manager.h>
-#include <app_control.h>
+#include <app_control_internal.h>
+#include <bundle.h>
+#include <aul.h>
 
 #include "share_panel_internal.h"
+
 #include "conf.h"
 #include "grid.h"
 #include "log.h"
@@ -137,13 +140,14 @@ int _app_control_launch(item_s *item)
 
 	int ret = APP_CONTROL_ERROR_NONE;
 
-	ret = app_control_set_app_id(item->caller_control, item->appid);
-	retv_if(ret != APP_CONTROL_ERROR_NONE, ret);
+	bundle *control_bundle;
 
-	ret = app_control_send_launch_request(item->caller_control, _app_reply_cb, NULL);
-	retv_if(ret != APP_CONTROL_ERROR_NONE, ret);
+	ret = app_control_export_as_bundle(item->caller_control, &control_bundle);
+	retv_if(ret != APP_CONTROL_ERROR_NONE, FAIL);
 
-	_D("app launched");
+	ret = aul_forward_app(item->appid, control_bundle);
+
+	bundle_free(control_bundle);
 
 	return ret;
 }
@@ -170,8 +174,8 @@ static void __item_selected(void *data, Evas_Object *obj, void *event_info)
 //	ret_if(!selected_item);
 //	elm_gengrid_item_selected_set(selected_item, EINA_FALSE);
 
-
 	ret = _app_control_launch(item_info);
+
 	if (ret < 0)
 		_E("Fail to launch app(%d)", ret);
 
