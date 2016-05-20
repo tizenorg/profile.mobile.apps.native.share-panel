@@ -17,9 +17,12 @@
 #include <Elementary.h>
 #include <app.h>
 #include <app_manager.h>
-#include <app_control.h>
+#include <app_control_internal.h>
+#include <bundle.h>
+#include <aul.h>
 
 #include "share_panel_internal.h"
+
 #include "conf.h"
 #include "grid.h"
 #include "log.h"
@@ -131,23 +134,6 @@ void _app_reply_cb (app_control_h request, app_control_h reply,
 	ui_app_exit();
 }
 
-int _app_control_launch(item_s *item)
-{
-	retv_if(!item->caller_control, APP_CONTROL_ERROR_INVALID_PARAMETER);
-
-	int ret = APP_CONTROL_ERROR_NONE;
-
-	ret = app_control_set_app_id(item->caller_control, item->appid);
-	retv_if(ret != APP_CONTROL_ERROR_NONE, ret);
-
-	ret = app_control_send_launch_request(item->caller_control, _app_reply_cb, NULL);
-	retv_if(ret != APP_CONTROL_ERROR_NONE, ret);
-
-	_D("app launched");
-
-	return ret;
-}
-
 static void __item_selected(void *data, Evas_Object *obj, void *event_info)
 {
 	_D("__item_selected");
@@ -171,7 +157,12 @@ static void __item_selected(void *data, Evas_Object *obj, void *event_info)
 //	elm_gengrid_item_selected_set(selected_item, EINA_FALSE);
 
 
-	ret = _app_control_launch(item_info);
+	bundle *control_bundle;
+
+	app_control_export_as_bundle(item_info->caller_control, &control_bundle);
+	ret = aul_forward_app(item_info->appid, control_bundle);
+
+	bundle_free(control_bundle);
 	if (ret < 0)
 		_E("Fail to launch app(%d)", ret);
 

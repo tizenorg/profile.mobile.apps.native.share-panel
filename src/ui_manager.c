@@ -18,8 +18,13 @@
 #include <Elementary.h>
 #include <notification.h>
 
+#include <app_control_internal.h>
+#include <bundle.h>
+#include <aul.h>
+
 #include "share_panel_internal.h"
 #include "share_panel.h"
+
 #include "log.h"
 #include "grid.h"
 #include "list.h"
@@ -219,10 +224,15 @@ Evas_Object *_ui_manager_create(share_panel_s *share_panel)
 		item_info = eina_list_nth(share_panel->list, 0);
 		goto_if(!item_info, ERROR);
 
-		_app_control_launch(item_info);
+		bundle *control_bundle;
+
+		app_control_export_as_bundle(item_info->caller_control, &control_bundle);
+		ret = aul_forward_app(item_info->appid, control_bundle);
+
 		if (ret < 0) {
 			_E("Fail to launch app(%d)", ret);
 		}
+		bundle_free(control_bundle);
 		ui_app_exit();
 	}
 
