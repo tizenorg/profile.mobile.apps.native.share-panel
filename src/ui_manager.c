@@ -20,6 +20,7 @@
 
 #include "share_panel_internal.h"
 #include "share_panel.h"
+
 #include "log.h"
 #include "grid.h"
 #include "list.h"
@@ -219,10 +220,12 @@ Evas_Object *_ui_manager_create(share_panel_s *share_panel)
 		item_info = eina_list_nth(share_panel->list, 0);
 		goto_if(!item_info, ERROR);
 
-		_app_control_launch(item_info);
+		ret = _app_control_launch(item_info);
+
 		if (ret < 0) {
 			_E("Fail to launch app(%d)", ret);
 		}
+
 		ui_app_exit();
 	}
 
