@@ -90,6 +90,7 @@ static inline void __get_mime(const char *file_path, char **mime)
 	if (strncmp(file_path, "/", 1) == 0) {
 		res = __get_file_ext(file_path, &ext);
 		if (0 != res) {
+			*mime = NULL;
 			_D("__get_file_ext error..");
 		} else {
 			mime_type_get_mime_type(ext, mime);
@@ -204,8 +205,9 @@ static void __create_multi_share_list(app_control_h control, Eina_List **matchli
 
 		__get_mime(data_array[i], &mime);
 		if (!mime) {
-			_E("no mime");
-			goto out;
+			_E("No mime. Setting mime to '*/*' ");
+			mime = malloc(sizeof("*/*"));
+			strcmp(mime, "*/*");
 		}
 
 		EINA_LIST_FOREACH(mime_list, l, tmp) {
