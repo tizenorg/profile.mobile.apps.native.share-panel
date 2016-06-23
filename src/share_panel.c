@@ -208,7 +208,6 @@ EAPI int share_panel_destroy(share_panel_h share_panel)
 		__destroy_win(share_panel->win);
 	}
 
-	app_control_destroy(share_panel->control);
 	free(share_panel);
 
 	return SHARE_PANEL_ERROR_NONE;
