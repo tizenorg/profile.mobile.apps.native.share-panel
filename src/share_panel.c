@@ -122,7 +122,7 @@ static Evas_Object *__create_win(share_panel_h share_panel)
 	elm_object_event_callback_add(win, _back_key_pressed, share_panel);
 	evas_object_smart_callback_add(win, "wm,rotation,changed", _rotate_cb, share_panel);
 
-	efl_util_set_window_opaque_state(win, 1);
+	efl_util_set_window_opaque_state(win, 0);
 
 	elm_win_indicator_mode_set(win, ELM_WIN_INDICATOR_HIDE);
 	elm_win_borderless_set(win, EINA_TRUE);
