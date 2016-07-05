@@ -1,6 +1,6 @@
 Name:       org.tizen.share-panel
-VCS:         profile/mobile/apps/native/share-panel#0ef592027041edda5176ec997c8918b5349ab09f
-#RS_Ver:    20160622_2 
+#VCS_FROM:   profile/mobile/apps/native/share-panel#84035f293090acc8b4b289a2e7bac869b33a7337
+#RS_Ver:    20160705_1 
 Summary:    Share Panel
 Version:    1.0.0
 Release:    1
@@ -26,7 +26,7 @@ Requires(post):  /usr/bin/tpk-backend
 %endif
 
 %description
-#
+profile/mobile/apps/native/share-panel#84035f293090acc8b4b289a2e7bac869b33a7337
 This is a container package which have preload TPK files
 
 %prep
