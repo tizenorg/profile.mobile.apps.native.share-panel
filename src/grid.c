@@ -127,13 +127,6 @@ static void __del(void *data, Evas_Object *obj)
 	evas_object_data_del(obj, PRIVATE_DATA_KEY_ITEM_INFO);
 }
 
-void _app_reply_cb (app_control_h request, app_control_h reply,
-						app_control_result_e result, void *user_data)
-{
-	if (result == APP_CONTROL_RESULT_APP_STARTED || result == APP_CONTROL_RESULT_SUCCEEDED)
-	ui_app_exit();
-}
-
 int _app_control_launch(item_s *item)
 {
 	retv_if(!item->caller_control, APP_CONTROL_ERROR_INVALID_PARAMETER);
@@ -174,6 +167,8 @@ static void __item_selected(void *data, Evas_Object *obj, void *event_info)
 
 	if (ret < 0)
 		_E("Fail to launch app(%d)", ret);
+	else
+		ui_app_exit();
 
 	item_info->share_panel->after_launch = 1;
 

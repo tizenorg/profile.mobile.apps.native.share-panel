@@ -237,18 +237,6 @@ static bool _create_cb(void *data)
 	return true;
 }
 
-
-static void _terminate_cb(void *data)
-{
-	share_panel_h *share_panel = data;
-
-	ret_if(!share_panel);
-
-	share_panel_hide(*share_panel);
-	share_panel_destroy(*share_panel);
-}
-
-
 static void _app_control(app_control_h control, void *data)
 {
 	share_panel_h *share_panel = data;
@@ -304,7 +292,6 @@ EAPI int main(int argc, char **argv)
 	share_panel_h share_panel = NULL;
 
 	lifecycle_callback.create = _create_cb;
-	lifecycle_callback.terminate = _terminate_cb;
 	lifecycle_callback.pause = _pause_cb;
 	lifecycle_callback.resume = NULL;
 	lifecycle_callback.app_control = _app_control;
