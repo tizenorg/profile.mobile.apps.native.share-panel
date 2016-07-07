@@ -1,6 +1,6 @@
 Name:       org.tizen.share-panel
 #VCS_FROM:   profile/mobile/apps/native/share-panel#a2d4dd526c899d04af282ea141afcadfec62ab06
-#RS_Ver:    20160705_2 
+#RS_Ver:    20160707_1 
 Summary:    Share Panel
 Version:    1.0.0
 Release:    1
