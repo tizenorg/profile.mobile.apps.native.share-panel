@@ -21,6 +21,7 @@
 #include <bundle.h>
 #include <aul.h>
 
+#include "share_panel.h"
 #include "share_panel_internal.h"
 
 #include "conf.h"
@@ -167,8 +168,10 @@ static void __item_selected(void *data, Evas_Object *obj, void *event_info)
 
 	if (ret < 0)
 		_E("Fail to launch app(%d)", ret);
-	else
+	else {
+		share_panel_reply(item_info->share_panel, true);
 		ui_app_exit();
+	}
 
 	item_info->share_panel->after_launch = 1;
 

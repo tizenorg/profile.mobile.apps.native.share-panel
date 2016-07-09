@@ -55,6 +55,7 @@ struct _share_panel {
 	int show_state;
 	int list_count;
 	int after_launch;
+	bool reply_requested;
 };
 typedef struct _share_panel share_panel_s;
 

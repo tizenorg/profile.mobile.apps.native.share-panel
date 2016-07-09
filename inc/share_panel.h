@@ -303,6 +303,17 @@ extern int share_panel_show(share_panel_h share_panel);
 extern int share_panel_hide(share_panel_h share_panel);
 
 /**
+ * @brief Reply caller of share-panel application about sharing operation
+ * result.
+ *
+ * @param share_panel share panel handle
+ * @param result sharing result, true on success, false otherwise
+ *
+ * @return SHARE_PANEL_ERROR_NONE on succes, other value on failure.
+ */
+extern int share_panel_reply(share_panel_h share_panel, bool result);
+
+/**
  * @}
  */
 
