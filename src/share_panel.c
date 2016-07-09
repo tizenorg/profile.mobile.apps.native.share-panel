@@ -52,8 +52,7 @@ static Eina_Bool _back_key_pressed(void *data, Evas_Object *obj, Evas_Object *sr
 
 	_D("KEY PRESSED: %s", ev->key);
 	if (type == EVAS_CALLBACK_KEY_DOWN && !strncmp(KEY_BACK, ev->key, strlen(KEY_BACK))) {
-		_D("KEY PRESSED: %s", ev->key);
-
+		share_panel_reply(share_panel, false);
 		ui_app_exit();
 		return EINA_TRUE;
 	} else {
@@ -172,7 +171,18 @@ EAPI int share_panel_create(app_control_h control, share_panel_h *share_panel)
 	}
 	panel->page_height = ELM_SCALE_SIZE(SCROLLER_HEIGHT);
 
-	panel->control = control;
+	int err = app_control_is_reply_requested(control, &panel->reply_requested);
+	if (err != APP_CONTROL_ERROR_NONE) {
+		_E("app_control_is_reply_requested failed: %s", get_error_message(err));
+		panel->reply_requested = false;
+	}
+
+	err = app_control_clone(&panel->control, control);
+	if (err != APP_CONTROL_ERROR_NONE) {
+		_E("app_control_clone failed. Unable to reply to share request");
+		panel->control = NULL;
+		panel->reply_requested = false;
+	}
 	panel->after_launch = 0;
 
 	panel->ui_manager = _ui_manager_create(panel);
@@ -197,6 +207,36 @@ ERROR:
 	return SHARE_PANEL_ERROR_NOT_INITIALIZED;
 }
 
+EAPI int share_panel_reply(share_panel_h share_panel, bool result)
+{
+	app_control_h reply;
+
+	if (!share_panel->reply_requested)
+		return SHARE_PANEL_ERROR_NONE;
+
+	if (!share_panel->control) {
+		_E("No request context. Unable to send app_control result");
+		return SHARE_PANEL_ERROR_NOT_INITIALIZED;
+	}
+
+	int err = app_control_create(&reply);
+	if (err != APP_CONTROL_ERROR_NONE) {
+		_E("app_control_create failed: %s", get_error_message(err));
+		return SHARE_PANEL_ERROR_INVALID_PARAMETER;
+	}
+
+	err = app_control_reply_to_launch_request(reply, share_panel->control,
+			result ? APP_CONTROL_RESULT_SUCCEEDED : APP_CONTROL_RESULT_FAILED);
+	if (err != APP_CONTROL_ERROR_NONE) {
+		_E("app_control_reply_to_launch_request failed: %s", get_error_message(err));
+		app_control_destroy(reply);
+		return SHARE_PANEL_ERROR_INVALID_PARAMETER;
+	}
+
+	_D("app_control_reply_to_launch_request, result: %d", result);
+	app_control_destroy(reply);
+	return SHARE_PANEL_ERROR_NONE;
+}
 
 EAPI int share_panel_destroy(share_panel_h share_panel)
 {
@@ -208,6 +248,7 @@ EAPI int share_panel_destroy(share_panel_h share_panel)
 		__destroy_win(share_panel->win);
 	}
 
+	app_control_destroy(share_panel->control);
 	free(share_panel);
 
 	return SHARE_PANEL_ERROR_NONE;
