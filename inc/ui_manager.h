@@ -19,13 +19,46 @@
 
 #include <Elementary.h>
 
+/**
+ * @brief Creates share panel ui manager.
+ *
+ * @param share_panel The share panel main info structure
+ *
+ * @return ui manager's Evas_Object
+ */
 extern Evas_Object *_ui_manager_create(share_panel_s *share_panel);
+
+/**
+ * @brief Destroys share panel ui manager
+ *
+ * @param ui_manager The UI to be destroyed
+ */
 extern void _ui_manager_destroy(Evas_Object *ui_manager);
 
+/**
+ * @brief Resizes the share panel UI.
+ *
+ * @param ui_manager The UI widget
+ * @param width The new width size to be set
+ * @param height The new height size to be set
+ */
 extern void _ui_manager_resize(Evas_Object *ui_manager, int width, int height);
+
+/**
+ * @brief Shows share panel UI.
+ *
+ * @param share_panel The share panel info structure
+ */
 extern int _ui_manager_show(share_panel_h share_panel);
+
+/**
+ * @brief Hides share panel UI.
+ *
+ * @param share_panel The share panel info structure
+ *
+ * @return share_panel_error_e enumeration
+ */
 extern int _ui_manager_hide(share_panel_h share_panel);
 
-extern void _ui_manager_reply_to_cancellation(share_panel_h share_panel);
 
 #endif /* __TIZEN_SHARE_PANEL_UI_MANAGER_H__ */

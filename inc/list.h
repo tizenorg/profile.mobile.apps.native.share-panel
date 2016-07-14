@@ -19,7 +19,31 @@
 
 #include <Elementary.h>
 
+/**
+ * @defgroup List List
+ */
+
+/**
+ * @addtogroup List
+ * @{
+ */
+
+/**
+ * @brief Creates list of the sharing applications.
+ *
+ * @param share_panel Share panel info handle
+ */
 Eina_List *_list_create(share_panel_h share_panel);
+
+/**
+ * @brief Destroys list of applications.
+ *
+ * @param list The list to be destroyed.
+ */
 void _list_destroy(Eina_List *list);
+
+/**
+ * @}
+ */
 
 #endif /* __TIZEN_SHARE_PANEL_LIST_H__ */
