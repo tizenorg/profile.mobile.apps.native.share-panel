@@ -18,13 +18,24 @@
 #define UTILS_H_
 
 /**
+ * @defgroup Utils Utilities
+ * @addtogroup Utils
+ * @{
+ */
+
+/**
+ * @brief Gets share panel's absolute resource path
+ *
  * @param sub_path sub path in res/ folder
  *
  * @return Absolute path for sub_path
- * @remarks	The returned path should be released.
+ * @remarks The returned path should be released.
  */
 
 char *utils_get_res_file_path(char *sub_path);
 
+/**
+ * @}
+ */
 
 #endif /* UTILS_H_ */

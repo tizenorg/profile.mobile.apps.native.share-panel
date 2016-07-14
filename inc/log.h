@@ -19,6 +19,11 @@
 
 #include <dlog.h>
 
+/**
+ * @addtogroup Utils
+ * @{
+ */
+
 #define OK		(0)
 #define FAIL	(-1)
 
@@ -95,5 +100,9 @@
 		continue; \
 	} \
 }
+
+/**
+ * @}
+ */
 
 #endif /* __TIZEN_SHARE_PANEL_LOG_H__ */
