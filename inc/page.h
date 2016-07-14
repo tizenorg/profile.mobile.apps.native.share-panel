@@ -19,9 +19,42 @@
 
 #include <Elementary.h>
 
+/**
+ * @ingroup View
+ * @defgroup Page Page
+ * @addtogroup Page
+ * @{
+ */
+
+/**
+ * @brief Creates share panel scroller's page.
+ *
+ * @param scroller The scroller where to add page
+ * @param page_width Width of the page
+ * @param page_height Height of the page
+ *
+ * @return created page
+ */
 extern Evas_Object *_page_create(Evas_Object *scroller, int page_width, int page_height);
+
+/**
+ * @brief Destroys scroller's page.
+ *
+ * @param page The page to be destroyed
+ */
 extern void _page_destroy(Evas_Object *page);
 
+/**
+ * @brief Resizes page.
+ *
+ * @param page The page to be resized
+ * @param width Page's new width
+ * @param height Page's new height
+ */
 extern void _page_resize(Evas_Object *page, int width, int height);
+
+/**
+ * @}
+ */
 
 #endif /* __TIZEN_SHARE_PANEL_PAGE_H__ */

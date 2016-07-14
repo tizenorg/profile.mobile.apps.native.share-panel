@@ -28,15 +28,22 @@
 #define DEFAULT_ICON "/usr/share/icons/A01-1_icon_Menu.png"
 #define KEY_BACK "XF86Back"
 
+/**
+ * @addtogroup SPInternal
+ * @{
+ */
 
-
+/**
+ * @brief Share panel state enumeration.
+ */
 enum {
 	SHARE_PANEL_SHOW_STATE_HIDE,
 	SHARE_PANEL_SHOW_STATE_HALF,
 };
 
-
-
+/**
+ * @brief Share panel base info structure.
+ */
 struct _share_panel {
 	Evas_Object *win;
 	Evas_Object *ui_manager;
@@ -59,8 +66,9 @@ struct _share_panel {
 };
 typedef struct _share_panel share_panel_s;
 
-
-
+/**
+ * @brief Application related item info structure.
+ */
 struct _item {
 	app_control_h caller_control;
 	share_panel_s *share_panel;
@@ -72,6 +80,8 @@ struct _item {
 };
 typedef struct _item item_s;
 
-
+/**
+ * @}
+ */
 
 #endif // __TIZEN_SHARE_PANEL_INTERNAL_H__

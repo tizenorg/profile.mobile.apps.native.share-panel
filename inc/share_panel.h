@@ -31,13 +31,11 @@ extern "C" {
 #endif
 
 /**
- * @file share_panel.h
- * @brief This file declares the API of the libshare-panel library.
- */
-
-/**
- * @addtogroup CAPI_PANEL_SHARE_MODULE
+ * @defgroup View View
+ * @defgroup SPanel Share Panel
+ * @addtogroup SPanel
  * @{
+ * 	@defgroup SPInternal Share Panel Internal
  */
 
 /**
