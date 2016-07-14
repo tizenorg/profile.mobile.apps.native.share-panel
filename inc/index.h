@@ -19,10 +19,50 @@
 
 #include <Evas.h>
 
+/**
+ * @defgroup Index Index
+ */
+
+/**
+ * @addtogroup Index
+ * @{
+ */
+
+/**
+ * @brief Creates page index.
+ *
+ * @param ui_manager Parent layout
+ * @param count Number of pages
+ *
+ * @return Evas_Object of the created index
+ */
 extern Evas_Object *_index_create(Evas_Object *ui_manager, unsigned int count);
+
+/**
+ * @brief Updates the index status.
+ *
+ * @param index The index to be updated
+ * @param count Number of pages
+ */
 extern void _index_update(Evas_Object *index, unsigned int count);
+
+/**
+ * @brief Destroys index.
+ *
+ * @param index The index to be destroyed
+ */
 extern void _index_destroy(Evas_Object *index);
 
+/**
+ * @brief Sets index page.
+ *
+ * @param index The index object to be set
+ * @param idx The index
+ */
 extern void _index_bring_in(Evas_Object *index, int idx);
+
+/**
+ * @}
+ */
 
 #endif //__TIZEN_SHARE_PANEL_INDEX_H__

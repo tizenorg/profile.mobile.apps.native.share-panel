@@ -19,14 +19,67 @@
 
 #include <Elementary.h>
 
+/**
+ * @defgroup Grid Grid
+ */
+
+/**
+ * @addtogroup Grid
+ * @{
+ */
+
+/**
+ * @brief Creates grid of applications that meet sharing requirements.
+ *
+ * @param page The page widget
+ *
+ * @return Created grid
+ */
 extern Evas_Object *_grid_create(Evas_Object *page);
+
+/**
+ * @brief Destroys the applications grid.
+ *
+ * @param grid The grid to be destroyed
+ */
 extern void _grid_destroy(Evas_Object *grid);
 
+/**
+ * @brief Appends item to the applications grid.
+ *
+ * @param grid The grid widget
+ * @param item_info The info structure of the item to be appended
+ *
+ * @return Elm_Object_Item of the appended item
+ */
 extern Elm_Object_Item *_grid_append_item(Evas_Object *grid, item_s *item_info);
+
+/**
+ * @brief Removes item from the application grid.
+ *
+ * @param grid The grid from where item is removed
+ * @param item_info Info structure of the item to be removed
+ */
 extern void _grid_remove_item(Evas_Object *grid, item_s *item_info);
 
+/**
+ * @brief Returns number of items in application grid.
+ * 
+ * @param grid The grid widget
+ */
 extern int _grid_count_item(Evas_Object *grid);
 
+/**
+ * @brief Sends app control launch request
+ *
+ * @param item The info structure of the item related with app to be launched
+ * 
+ * @return app_control_error_e type value
+ */
 int _app_control_launch(item_s *item);
+
+/**
+ * @}
+ */
 
 #endif /* __TIZEN_SHARE_PANEL_GRID_H__ */
