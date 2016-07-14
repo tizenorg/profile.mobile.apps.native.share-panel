@@ -19,7 +19,35 @@
 
 #include <Elementary.h>
 
+/**
+ * @defgroup Model Model
+ */
+
+/**
+ * @ingroup Model
+ * @defgroup List List
+ * @addtogroup List
+ * @{
+ */
+
+/**
+ * @brief Creates list of the sharing data applications.
+ *
+ * @param share_panel Share panel info handle
+ *
+ * @return created list
+ */
 Eina_List *_list_create(share_panel_h share_panel);
+
+/**
+ * @brief Destroys list of the sharing data applications.
+ *
+ * @param list The list to be destroyed.
+ */
 void _list_destroy(Eina_List *list);
+
+/**
+ * @}
+ */
 
 #endif /* __TIZEN_SHARE_PANEL_LIST_H__ */
