@@ -68,13 +68,12 @@ typedef enum share_panel_error {
  * @privilege %http://tizen.org/privilege/appmanager.launch
  * @remarks The caller app has to check the return value of this function.\n
  *
- * @param[in] conformant The caller's conformant
  * @param[in] control The app control handler.\n
  *                    This control needs a share operation among below operations.\n
  *                    http://tizen.org/appcontrol/operation/share\n
  *                    http://tizen.org/appcontrol/operation/multi_share\n
  *                    http://tizen.org/appcontrol/operation/share_text\n
- *                    These operations are defined in @ref CAPI_APP_CONTROL_MODULE.
+ *                    These operations are defined in application/app-control API.
  * @param[out] share_panel The share panel handler
  * @return @c SHARE_PANEL_ERROR_NONE on success,
  *         otherwise a negative error value
@@ -140,7 +139,7 @@ extern int share_panel_create(app_control_h control, share_panel_h *share_panel)
  * @since_tizen 2.4
  * @remarks The caller app has to check the return value of this function.\n
  *
- * @param[in] share_panel_h Share panel handler
+ * @param[in] share_panel Share panel handler
  * @return @c SHARE_PANEL_ERROR_NONE on success,
  *         otherwise a negative error value
  * @retval #SHARE_PANEL_ERROR_NONE Successful
@@ -192,7 +191,7 @@ extern int share_panel_destroy(share_panel_h share_panel);
  * @remarks The caller app has to check the return value of this function.\n
  *          share_panel_show will activate an animation to display the panel.
  *
- * @param[in] share_panel_h Share panel handler
+ * @param[in] share_panel Share panel handler
  * @return @c SHARE_PANEL_ERROR_NONE on success,
  *         otherwise a negative error value
  * @retval #SHARE_PANEL_ERROR_NONE Successful
@@ -256,7 +255,7 @@ extern int share_panel_show(share_panel_h share_panel);
  * @remarks The caller app has to check the return value of this function.\n
  *          share_panel_hide will activate an animation to disappear the panel.
  *
- * @param[in] share_panel_h Share panel handler
+ * @param[in] share_panel Share panel handler
  * @return @c SHARE_PANEL_ERROR_NONE on success,
  *         otherwise a negative error value
  * @retval #SHARE_PANEL_ERROR_NONE Successful
