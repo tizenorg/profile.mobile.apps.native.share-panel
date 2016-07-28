@@ -96,6 +96,7 @@ static void __click_back_btn_cb(void *data, Evas_Object *obj, void *event_info)
 	ret_if(!share_panel);
 
 	_D("back button clicked, destroy the share-panel");
+	share_panel_reply(share_panel, false);
 	share_panel_destroy(share_panel);
 }
 
