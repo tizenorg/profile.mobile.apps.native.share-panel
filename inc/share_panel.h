@@ -31,6 +31,68 @@ extern "C" {
 #endif
 
 /**
+ * @mainpage Share-Panel documentation
+ *
+ * Share-panel application is for sharing content(files, texts, contacts, etc.) using apps that are set for handling particular sharing option.
+ *
+ * There are three types of share:
+ * - APP_CONTROL_OPERATION_SHARE
+ * - APP_CONTROL_OPERATION_MULTI_SHARE
+ * - APP_CONTROL_OPERATION_SHARE_TEXT
+ *
+ * Share-panel shows you which applications can handle your share request:
+ * @image html screenshot.png
+ * \n
+ * <HR>
+ * \n
+ *
+ * @section overview Detailed Description
+ *
+ * @ref share_content \n
+ * @ref how_share_set_up
+ *
+ * @section share_content How to share content?
+ * \n
+ * To share content via share-panel you need to use App Control API. Below you can find example of how to share text:
+ * @code
+ * app_control_h control;
+ * app_control_create(&control);
+
+ * app_control_set_operation(control, APP_CONTROL_OPERATION_SHARE_TEXT);
+ * app_control_add_extra_data(control, APP_CONTROL_DATA_TEXT, "TEST_TEXT");
+ *
+ * app_control_send_launch_request(control, NULL, NULL);
+ * @endcode
+ *
+ * To share one file use APP_CONTROL_OPERATION_SHARE instead of APP_CONTROL_OPERATION_SHARE_TEXT and add file path as uri:
+ * @code
+ * app_control_set_uri(control, "file_path");
+ * @endcode
+ * To share more than one file use APP_CONTROL_OPERATION_MULTI_SHARE instead of APP_CONTROL_OPERATION_SHARE_TEXT and add files paths as extra data:
+ * @code
+ * app_control_add_extra_data_array(control, APP_CONTROL_DATA_PATH, { "first_path", "second_path" }, count_of_files_to_share);
+ * @endcode
+ *
+ * Share-panel app will display all apps that are registered to share particular content basing on files extension.
+ * \n\n
+ * <HR>
+ *
+ * @section how_share_set_up How to set up app to be registered as sharing content app and might be displayed in share-panel?
+ *
+ * Go to tizen-manifest.xml file of your app.
+ * Go to 'Advanced' tab and then to 'Application Control' section.
+ * Click button 'Add...' and edit entry on the buttons left side
+ * Chose operation from drop-down list as one of:
+ *  - http://tizen.org/appcontrol/operation/multi_share
+ *  - http://tizen.org/appcontrol/operation/share
+ *  - http://tizen.org/appcontrol/operation/share_text
+ *
+ * Chose 'Mime' from drop-down list or left empty if your app is able to share all files extension.
+ *
+ *
+ */
+
+/**
  * @defgroup View View
  * @defgroup SPanel Share Panel
  * @addtogroup SPanel
